@@ -1,4 +1,5 @@
 from tokens import *
+from ast import *
 
 from scanner import PhotonScanner
 
@@ -57,45 +58,51 @@ class PhotonExpressionParser(PhotonParser):
             #print 'led of t', t
             left = self.led(t, left)
             #print 'rbp, token, lbp', rbp, self.peek(), self.lbp(self.peek())
-        #print 'ret left'
+        print 'ret left', left
         return left
 
 class PhotonStatementParser(PhotonExpressionParser):
     def parse_return_statement(self):
+        statement = ReturnStmt()
         self.next(Token.KEYWORD_RETURN)
-        expr = self.parse_expression()
-        print 'expr', expr
+        statement.expression = self.parse_expression()
+        return statement
 
     def parse_statement(self):
         token = self.peek()
-        print 'ps', token
         if token == Token.KEYWORD_RETURN:
-            print 'parse ret'
-            self.parse_return_statement()
-            print 'parse ret done'
+            return self.parse_return_statement()
         else:
             self.next()
             raise SyntaxError("expected statement, got '%s'" % token)
 
     def parse_statement_block(self):
         self.next(Token.DELIM_LBRACE)
+        statements = []
         while True:
             if self.peek() == Token.DELIM_RBRACE:
                 self.next(Token.DELIM_RBRACE)
                 print 'exit block'
                 break
-            self.parse_statement()
+            statements.append(self.parse_statement())
+        return statements
 
     def parse_function(self):
+        node = FunctionStmt()
         token = self.next()
         if not token.is_identifier():
             raise SyntaxError("expected identifier")
+        node.name = token.value
+        node.arguments = []
         token = self.next(Token.DELIM_LPAREN)
         while True:
             token = self.next([Token.KEYWORD_INT, Token.KEYWORD_STRING])
+            argument_type = token.value
             token = self.next()
             if not token.is_identifier():
                 raise SyntaxError("expected identifier")
+            argument_name = token.value
+            node.arguments.append((argument_type, argument_name))
             token = self.next()
             if token == Token.DELIM_RPAREN:
                 break
@@ -103,21 +110,28 @@ class PhotonStatementParser(PhotonExpressionParser):
                 continue
             else:
                 raise SyntaxError("expected ',' or ')'")
-        self.parse_statement_block()
+        node.statements = self.parse_statement_block()
+        return node
 
     def parse_module(self):
+        node = Module()
+        statements = []
         while True:
             token = self.next()
             if token == Token.KEYWORD_FUNCTION:
-                self.parse_function()
+                statements.append(self.parse_function())
             elif token == Token.EOF:
                 break
             else:
                 raise SyntaxError(token)
+        node.statements = statements
+        return node
 
 scanner = PhotonScanner('src/test.js')
 parser = PhotonStatementParser(scanner)
-parser.parse_module()
+module = parser.parse_module()
+pp = PrettyPrinter()
+pp.pretty_print(module)
 
 #scanner = PhotonScanner('src/expr.js')
 #parser = PhotonExpressionParser(scanner)
