@@ -1,40 +1,48 @@
-from plex import *
 from tokens import *
 
-letter = Range("AZaz")
-digit = Range("09")
-name = letter + Rep(letter | digit)
-number = Rep1(digit)
+from scanner import PhotonScanner
 
-def token_or_identifier(scanner, txt):
-    token = TokenKeyword.get(txt)
-    if token is None:
-        return TokenIdentifier(txt)
-    else:
-        return token
+class PhotonParser(object):
+    def __init__(self, scanner):
+        self.scanner = scanner
 
-lexicon = Lexicon([
-    (name,            token_or_identifier),
-    (number,          'int'),
-    (Str('('), Token.DELIM_LPAREN),
-    (Str(')'), Token.DELIM_RPAREN),
-    (Str('['), Token.DELIM_LBRACK),
-    (Str(']'), Token.DELIM_RBRACK),
-    (Str('{'), Token.DELIM_LBRACE),
-    (Str('}'), Token.DELIM_RBRACE),
-    (Str(','), Token.DELIM_COMMA),
-    (Str(':'), Token.DELIM_COLON),
-    (Str('+'), Token.OP_PLUS),
-    (Str('-'), Token.OP_MIN),
-    (Rep1(Any(" \t\n")), IGNORE)
-])
+    def next(self, expect = None):
+        return self.scanner.next(expect)
 
-filename = "src/test.js"
-f = open(filename, "r")
-scanner = Scanner(lexicon, f, filename)
-while 1:
-    token = scanner.read()
-    print token
-    if token[0] is None:
-        break
+    def parse_statement_block(self):
+        token = self.next(Token.DELIM_LBRACE)
+        token = self.next(Token.DELIM_RBRACE)
+
+    def parse_function(self):
+        token = self.next()
+        if not token.is_identifier():
+            raise SyntaxError("expected identifier")
+        token = self.next(Token.DELIM_LPAREN)
+        while True:
+            token = self.next([Token.KEYWORD_INT, Token.KEYWORD_STRING])
+            token = self.next()
+            if not token.is_identifier():
+                raise SyntaxError("expected identifier")
+            token = self.next()
+            if token == Token.DELIM_RPAREN:
+                break
+            elif token == Token.DELIM_COMMA:
+                continue
+            else:
+                raise SyntaxError("expected ',' or ')'")
+        self.parse_statement_block()
+        
+    def parse_module(self):
+        while True:
+            token = self.next()
+            if token == Token.KEYWORD_FUNCTION:
+                self.parse_function()
+            elif token is None: 
+                break
+            else:
+                raise SyntaxError()
+
+scanner = PhotonScanner('src/test.js')
+parser = PhotonParser(scanner)
+parser.parse_module()
 

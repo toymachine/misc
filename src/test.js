@@ -1,4 +1,4 @@
-function sum(int a, int b) : void
+function sum(int a, int b)
 {
     return a + b
 }

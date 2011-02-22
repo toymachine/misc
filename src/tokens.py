@@ -2,11 +2,18 @@ class Token(object):
     def __init__(self, value):
         self.value = value
 
+    def is_identifier(self):
+        return False
+
+    def __repr__(self):
+        return "<token '%s'>" % self.value
+
 class TokenOperator(Token):
     pass
 
 class TokenIdentifier(Token):
-    pass
+    def is_identifier(self):
+        return True
 
 class TokenKeyword(Token):
     ALL = {}
