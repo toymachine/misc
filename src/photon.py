@@ -18,9 +18,9 @@ class PhotonExpressionParser(PhotonParser):
 
     def nud(self, token):
         if isinstance(token, TokenLiteral):
-            return token
+            return IntegerLiteralExpression(token.value)
         elif isinstance(token, TokenIdentifier):
-            return token
+            return IdentifierExpression(token.value)
 
         raise SyntaxError("no nud for token '%s'" % token)
 
@@ -38,27 +38,20 @@ class PhotonExpressionParser(PhotonParser):
         if isinstance(token, TokenOperator):
             if token.value == "+":
                 right = self.parse_expression(10)
-                return (left, token.value, right)
+                return BinaryExpression(left, token.value, right)
             elif token.value == "*":
                 right = self.parse_expression(20)
-                return (left, token.value, right)
+                return BinaryExpression(left, token.value, right)
 
         raise SyntaxError("no led for token '%s'" % token)
 
     def parse_expression(self, rbp = 0):
         t = self.next()
-        #print 'x', t, self.peek()
-        #print 'nud of', t
         left = self.nud(t)
-        #print 'lbp of token', self.peek()
         while rbp < self.lbp(self.peek()):
             t = self.peek()
             self.next()
-            #print 'y', t, self.peek()
-            #print 'led of t', t
             left = self.led(t, left)
-            #print 'rbp, token, lbp', rbp, self.peek(), self.lbp(self.peek())
-        print 'ret left', left
         return left
 
 class PhotonStatementParser(PhotonExpressionParser):
@@ -82,7 +75,6 @@ class PhotonStatementParser(PhotonExpressionParser):
         while True:
             if self.peek() == Token.DELIM_RBRACE:
                 self.next(Token.DELIM_RBRACE)
-                print 'exit block'
                 break
             statements.append(self.parse_statement())
         return statements
