@@ -1,0 +1,4 @@
+- create minimal photon interpreter in python
+- write lexer/parser/compiler for photon in photon
+- run the compiler on the interpreter to create compiled photon compiler
+
