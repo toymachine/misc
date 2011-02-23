@@ -23,12 +23,12 @@ class Class(ASTObject):
         self.implements = []
 
 class Method(ASTObject):
-    def __init__(self, name = '', type = 'Object', modifiers = [], parameters = [], statements = []):
+    def __init__(self, name = '', type = 'Object', modifiers = None, parameters = None, statements = None):
         self.name = name
         self.type = type
-        self.modifiers = modifiers
-        self.parameters = parameters
-        self.statements = statements
+        self.modifiers = modifiers if modifiers is not None else []
+        self.parameters = parameters if parameters is not None else []
+        self.statements = statements if statements is not None else []
 
 class Parameter(ASTObject):
     def __init__(self, name = '', type = 'Object', isArray = False):
@@ -117,9 +117,9 @@ class VariableExpression(Expression):
         self.target = target
 
 class BlockExpression(Expression):
-    def __init__(self, statements = []):
+    def __init__(self, statements = None):
         Expression.__init__(self)
-        self.statements = statements
+        self.statements = statements if statements is not None else []
 
 class BinaryExpression(Expression): pass
 class UnaryExpression(Expression): pass
@@ -240,11 +240,13 @@ class JavaSerializer(Serializer):
         self.emit(instanceOfExpression.type)
 
     def acceptBinaryExpression(self, binaryExpression):
+        self.emit("(")
         binaryExpression.left.__visit__(self)
         self.emit(" ")
         self.emit(binaryExpression.op)
         self.emit(" ")
         binaryExpression.right.__visit__(self)
+        self.emit(")")
 
     def acceptUnaryExpression(self, unaryExpression):
         self.emit(unaryExpression.op)
@@ -399,20 +401,22 @@ class JavaSerializer(Serializer):
 
     def emitBlock(self, statements):
         self.emit("{")
+        self.inc()
         for statement in statements:
             self.nl()
             statement.__visit__(self)
             #only put ; after statement if it is not a block statement
             if not isinstance(statement, BLOCK_STATEMENTS):
                 self.emit(";")
-            self.dec()
+        self.dec()
         self.nl()
         self.emit("}")
 
     def acceptModule(self, module):
-        self.emit("package %s;" % module.package)
-        self.nl()
-        self.nl()
+        if module.package:
+            self.emit("package %s;" % module.package)
+            self.nl()
+            self.nl()
         for import_ in module.imports:
             self.emit("import %s;" % import_)
             self.nl()
@@ -452,6 +456,7 @@ class JavaSerializer(Serializer):
             self.emit(" implements " + ", ".join(clazz.implements))
         self.nl()
         self.emit("{")
+        self.inc()
 
         for field, modifiers, type, init in clazz.fields:
             self.nl()
@@ -469,13 +474,13 @@ class JavaSerializer(Serializer):
             self.nl()
             innerClass.__visit__(self)
             self.nl()
-            self.dec()
 
         for method in clazz.methods:
             self.nl()
             method.__visit__(self)
             self.nl()
-            self.dec()
+
+        self.dec()
         self.nl()
         self.emit("}")
 

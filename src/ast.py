@@ -2,7 +2,7 @@ from serializer import Serializer
 
 class Node(object):
     def __accept__(self, visitor):
-        getattr(visitor, 'visit' + self.__class__.__name__)(self)
+        return getattr(visitor, 'visit' + self.__class__.__name__)(self)
 
 class Module(Node):
     pass
