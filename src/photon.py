@@ -90,16 +90,16 @@ class PhotonStatementParser(PhotonExpressionParser):
         if not token.is_identifier():
             raise SyntaxError("expected identifier, got: %s" % token)
         node.name = token.value
-        node.arguments = []
+        node.parameters = []
         token = self.next(Token.DELIM_LPAREN)
         while True:
             token = self.next([Token.KEYWORD_INT, Token.KEYWORD_STRING])
-            argument_type = token.value
+            parameter_type = token.value
             token = self.next()
             if not token.is_identifier():
                 raise SyntaxError("expected identifier, got: %s" % token)
-            argument_name = token.value
-            node.arguments.append((argument_type, argument_name))
+            parameter_name = token.value
+            node.parameters.append((parameter_type, parameter_name))
             token = self.next()
             if token == Token.DELIM_RPAREN:
                 break

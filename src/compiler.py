@@ -12,6 +12,8 @@ class Compiler(object):
 
         #call method
         j_callmethod = jast.Method('call', type = 'int', modifiers = ['public'])
+        for parameter_type, parameter_name in p_function.parameters:
+            j_callmethod.parameters.append(jast.Parameter(parameter_name, parameter_type))
 
         for statement in p_function.statements:
             j_callmethod.statements.append(statement.__accept__(self))
@@ -20,7 +22,9 @@ class Compiler(object):
 
         self.j_funclasses.append(j_funclass)
 
-        return jast.Unknown("functionstmt")
+        j_assignment = jast.AssignmentExpression(jast.VariableExpression('v_' + p_function.name), jast.NewExpression(p_function.name), p_function.name)
+
+        return j_assignment
 
     def visitIntegerLiteralExpression(self, p_literalexpr):
         return jast.LiteralInteger(p_literalexpr.value)

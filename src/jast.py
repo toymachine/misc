@@ -206,9 +206,9 @@ class JavaSerializer(Serializer):
         self.emit("{")
         self.start_list()
         for expression in initializerList.expressions:
-            self.startItem()
+            self.start_item()
             expression.__visit__(self)
-            self.endItem()
+            self.end_item()
         self.end_list()
         self.emit("}")
 
@@ -228,9 +228,9 @@ class JavaSerializer(Serializer):
         self.emit("(")
         self.start_list()
         for parameter in methodInvocationExpression.parameters:
-            self.startItem()
+            self.start_item()
             parameter.__visit__(self)
-            self.endItem()
+            self.end_item()
         self.end_list()
         self.emit(")")
 
@@ -306,9 +306,9 @@ class JavaSerializer(Serializer):
             self.emit("(")
             self.start_list()
             for parameter in newExpression.parameters:
-                self.startItem()
+                self.start_item()
                 parameter.__visit__(self)
-                self.endItem()
+                self.end_item()
             self.end_list()
             self.emit(")")
         if newExpression.initializer:
@@ -434,13 +434,13 @@ class JavaSerializer(Serializer):
         self.emit(method.type + " " + method.name + "(")
         self.start_list()
         for param in method.parameters:
-            self.startItem()
+            self.start_item()
             self.emit(param.type)
             self.emit(" ")
             self.emit(param.name)
             if param.isArray:
                 self.emit("[]")
-            self.endItem()
+            self.end_item()
         self.end_list()
         self.emit(")")
         self.nl()
@@ -473,13 +473,11 @@ class JavaSerializer(Serializer):
         for innerClass in clazz.innerClasses:
             self.nl()
             innerClass.__visit__(self)
-            self.nl()
 
         for method in clazz.methods:
             self.nl()
             method.__visit__(self)
-            self.nl()
-
+       
         self.dec()
         self.nl()
         self.emit("}")
