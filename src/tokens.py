@@ -11,6 +11,9 @@ class Token(object):
 class TokenOperator(Token):
     pass
 
+class TokenLiteral(Token):
+    pass
+
 class TokenIdentifier(Token):
     def is_identifier(self):
         return True

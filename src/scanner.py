@@ -13,9 +13,12 @@ def token_or_identifier(scanner, txt):
     else:
         return token
 
+def token_literal(scanner, txt):
+    return TokenLiteral(txt)
+
 lexicon = Lexicon([
     (name,            token_or_identifier),
-    (number,          'int'),
+    (number,          token_literal),
     (Str('('), Token.DELIM_LPAREN),
     (Str(')'), Token.DELIM_RPAREN),
     (Str('['), Token.DELIM_LBRACK),
@@ -33,9 +36,19 @@ class PhotonScanner(Scanner):
     def __init__(self, filename):
         f = open(filename, "r")
         Scanner.__init__(self, lexicon, f, filename)
+        self.current = None
+        self._read()
+
+    def _read(self):
+        token = self.current
+        self.current, _ = self.read()
+        return token
+
+    def peek(self):
+        return self.current
 
     def next(self, expect = None):
-        token, _ = self.read()
+        token = self._read()
         if expect:
             if isinstance(expect, list):
                 if token not in expect:
