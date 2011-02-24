@@ -1,5 +1,5 @@
 class Token(object):
-    def __init__(self, value):
+    def __init__(self, value = None):
         self.value = value
 
     def is_identifier(self):
@@ -11,12 +11,18 @@ class Token(object):
 class TokenOperator(Token):
     pass
 
+class TokenEOF(Token):
+    pass
+
 class TokenLiteral(Token):
     pass
 
 class TokenIdentifier(Token):
     def is_identifier(self):
         return True
+
+    def __repr__(self):
+        return "<token_ident '%s'>" % self.value
 
 class TokenKeyword(Token):
     ALL = {}
@@ -56,6 +62,8 @@ Token.OP_MUL = TokenOperator("*")
 Token.OP_DIV = TokenOperator("/")
 Token.OP_EQUALS = TokenOperator("==")
 Token.OP_ASSIGN = TokenOperator("=")
+
+Token.EOF = TokenEOF('<EOF>')
 
 Token.KEYWORD_FUNCTION = TokenKeyword(Keyword.FUNCTION)
 Token.KEYWORD_IF = TokenKeyword(Keyword.IF)

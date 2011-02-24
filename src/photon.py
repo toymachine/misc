@@ -17,38 +17,55 @@ class PhotonExpressionParser(PhotonParser):
 
     def nud(self, token):
         if isinstance(token, TokenLiteral):
-            return token.value
-
+            return token
+        elif isinstance(token, TokenIdentifier):
+            return token
         raise SyntaxError("no nud for token '%s'" % token)
 
     def lbp(self, token):
         if isinstance(token, TokenOperator):
             if token.value == "+":
                 return 10
+        elif token == Token.EOF:
+            return 0
 
         raise SyntaxError("no lbp for token '%s'" % token)
 
     def led(self, token, left):
+        if isinstance(token, TokenOperator):
+            if token.value == "+":
+                right = self.parse_expression(10)
+                return (left, token.value, right)
+
         raise SyntaxError("no led for token '%s'" % token)
 
     def parse_expression(self, rbp = 0):
-        current_token = self.next()
-        next_token = self.peek()
-        #print 'x', current_token, next_token
-        left = self.nud(current_token)
-        while rbp < self.lbp(next_token):
-            current_token = next_token
-            next_token = self.next()
-            left = self.led(current_token, left)
+        t = self.next()
+        #print 'x', t, self.peek()
+        #print 'nud of', t
+        left = self.nud(t)
+        #print 'lbp of token', self.peek()
+        while rbp < self.lbp(self.peek()):
+            t = self.peek()
+            self.next()
+            #print 'y', t, self.peek()
+            #print 'led of t', t
+            left = self.led(t, left)
+            #print 'rbp, token, lbp', rbp, self.peek(), self.lbp(self.peek())
+        #print 'ret left'
         return left
 
 class PhotonStatementParser(PhotonExpressionParser):
     def parse_return_statement(self):
         token = self.next(Token.KEYWORD_RETURN)
+        expr = self.parse_expression()
+        print 'expr'
 
     def parse_statement(self):
         token = self.peek()
+        print 'ps', token
         if token == Token.KEYWORD_RETURN:
+            print 'parse ret'
             self.parse_return_statement()
         else:
             self.next()
@@ -97,4 +114,4 @@ class PhotonStatementParser(PhotonExpressionParser):
 
 scanner = PhotonScanner('src/expr.js')
 parser = PhotonExpressionParser(scanner)
-parser.parse_expression()
+print parser.parse_expression()

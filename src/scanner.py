@@ -41,7 +41,11 @@ class PhotonScanner(Scanner):
 
     def _read(self):
         token = self.current
-        self.current, _ = self.read()
+        next, _ = self.read()
+        if next is None:
+            self.current = Token.EOF
+        else:
+            self.current = next
         return token
 
     def peek(self):
