@@ -29,6 +29,7 @@ lexicon = Lexicon([
     (Str(':'), Token.DELIM_COLON),
     (Str('+'), Token.OP_PLUS),
     (Str('-'), Token.OP_MIN),
+    (Str('*'), Token.OP_MUL),
     (Rep1(Any(" \t\n")), IGNORE)
 ])
 

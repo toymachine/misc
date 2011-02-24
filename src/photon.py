@@ -20,21 +20,26 @@ class PhotonExpressionParser(PhotonParser):
             return token
         elif isinstance(token, TokenIdentifier):
             return token
+
         raise SyntaxError("no nud for token '%s'" % token)
 
     def lbp(self, token):
         if isinstance(token, TokenOperator):
             if token.value == "+":
                 return 10
-        elif token == Token.EOF:
-            return 0
-
-        raise SyntaxError("no lbp for token '%s'" % token)
+            elif token.value == "*":
+                return 20
+            else:
+                raise SyntaxError("no lbp for token: %s" % token)
+        return 0
 
     def led(self, token, left):
         if isinstance(token, TokenOperator):
             if token.value == "+":
                 right = self.parse_expression(10)
+                return (left, token.value, right)
+            elif token.value == "*":
+                right = self.parse_expression(20)
                 return (left, token.value, right)
 
         raise SyntaxError("no led for token '%s'" % token)
@@ -57,9 +62,9 @@ class PhotonExpressionParser(PhotonParser):
 
 class PhotonStatementParser(PhotonExpressionParser):
     def parse_return_statement(self):
-        token = self.next(Token.KEYWORD_RETURN)
+        self.next(Token.KEYWORD_RETURN)
         expr = self.parse_expression()
-        print 'expr'
+        print 'expr', expr
 
     def parse_statement(self):
         token = self.peek()
@@ -67,15 +72,17 @@ class PhotonStatementParser(PhotonExpressionParser):
         if token == Token.KEYWORD_RETURN:
             print 'parse ret'
             self.parse_return_statement()
+            print 'parse ret done'
         else:
             self.next()
             raise SyntaxError("expected statement, got '%s'" % token)
 
     def parse_statement_block(self):
-        token = self.next(Token.DELIM_LBRACE)
+        self.next(Token.DELIM_LBRACE)
         while True:
             if self.peek() == Token.DELIM_RBRACE:
                 self.next(Token.DELIM_RBRACE)
+                print 'exit block'
                 break
             self.parse_statement()
 
@@ -103,15 +110,15 @@ class PhotonStatementParser(PhotonExpressionParser):
             token = self.next()
             if token == Token.KEYWORD_FUNCTION:
                 self.parse_function()
-            elif token is None:
+            elif token == Token.EOF:
                 break
             else:
-                raise SyntaxError()
+                raise SyntaxError(token)
 
-#scanner = PhotonScanner('src/test.js')
-#parser = PhotonStatementParser(scanner)
-#parser.parse_module()
+scanner = PhotonScanner('src/test.js')
+parser = PhotonStatementParser(scanner)
+parser.parse_module()
 
-scanner = PhotonScanner('src/expr.js')
-parser = PhotonExpressionParser(scanner)
-print parser.parse_expression()
+#scanner = PhotonScanner('src/expr.js')
+#parser = PhotonExpressionParser(scanner)
+#print parser.parse_expression()
