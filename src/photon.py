@@ -65,6 +65,8 @@ class PhotonStatementParser(PhotonExpressionParser):
         token = self.peek()
         if token == Token.KEYWORD_RETURN:
             return self.parse_return_statement()
+        elif token == Token.KEYWORD_FUNCTION:
+            return self.parse_function()
         else:
             self.next()
             raise SyntaxError("expected statement, got '%s'" % token)
@@ -80,10 +82,11 @@ class PhotonStatementParser(PhotonExpressionParser):
         return statements
 
     def parse_function(self):
+        self.next(Token.KEYWORD_FUNCTION)
         node = FunctionStmt()
         token = self.next()
         if not token.is_identifier():
-            raise SyntaxError("expected identifier")
+            raise SyntaxError("expected identifier, got: %s" % token)
         node.name = token.value
         node.arguments = []
         token = self.next(Token.DELIM_LPAREN)
@@ -92,7 +95,7 @@ class PhotonStatementParser(PhotonExpressionParser):
             argument_type = token.value
             token = self.next()
             if not token.is_identifier():
-                raise SyntaxError("expected identifier")
+                raise SyntaxError("expected identifier, got: %s" % token)
             argument_name = token.value
             node.arguments.append((argument_type, argument_name))
             token = self.next()
@@ -109,7 +112,7 @@ class PhotonStatementParser(PhotonExpressionParser):
         node = Module()
         statements = []
         while True:
-            token = self.next()
+            token = self.peek()
             if token == Token.KEYWORD_FUNCTION:
                 statements.append(self.parse_function())
             elif token == Token.EOF:
@@ -123,7 +126,7 @@ scanner = PhotonScanner('src/test.js')
 parser = PhotonStatementParser(scanner)
 module = parser.parse_module()
 pp = PrettyPrinter()
-pp.pretty_print(module)
+print pp.pretty_print(module)
 
 #scanner = PhotonScanner('src/expr.js')
 #parser = PhotonExpressionParser(scanner)

@@ -1,3 +1,5 @@
+from serializer import Serializer
+
 class Node(object):
     def __accept__(self, visitor):
         getattr(visitor, 'visit' + self.__class__.__name__)(self)
@@ -31,38 +33,54 @@ class IntegerLiteralExpression(Expression):
     def __init__(self, value):
         self.value = value
 
-class PrettyPrinter(object):
+class PrettyPrinter(Serializer):
+    def __init__(self):
+        Serializer.__init__(self)
+
     def visitModule(self, module):
         for statement in module.statements:
             statement.__accept__(self)
 
     def visitIntegerLiteralExpression(self, integer_literal_expression):
-        print integer_literal_expression.value
+        self.emit(integer_literal_expression.value)
 
     def visitIdentifierExpression(self, identifier_expression):
-        print identifier_expression.identifier
+        self.emit(identifier_expression.identifier)
 
     def visitBinaryExpression(self, binary_expression):
-        print "("
+        self.emit('(')
         binary_expression.left.__accept__(self)
-        print binary_expression.operator
-        binary_expression.right.__accept__(self) 
-        print ")"
+        self.emit(binary_expression.operator)
+        binary_expression.right.__accept__(self)
+        self.emit(')')
 
     def visitReturnStmt(self, return_statement):
-        print "return "
+        self.emit("return ")
         return_statement.expression.__accept__(self)
 
     def visitFunctionStmt(self, function_statement):
-        print "function " + function_statement.name + "("
+        self.emit("function " + function_statement.name + "(")
+        self.start_list()
         for arg_type, arg_name in function_statement.arguments:
-            print arg_type, arg_name, ",",
-        print ") {"
+            self.start_item()
+            self.emit(arg_type + " "  + arg_name)
+            self.end_item()
+        self.end_list()
+        self.emit(")")
+        self.nl()
+        self.emit('{')
+        self.inc()
+        self.nl()
         for statement in function_statement.statements:
             statement.__accept__(self)
-        print "}"
+        self.dec()
+        self.nl()
+        self.emit("}")
+        self.nl()
+        self.nl()
 
     def pretty_print(self, node):
+        self.start()
         node.__accept__(self)
-        
+        return self.end()
 

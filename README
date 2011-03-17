@@ -1,7 +1,22 @@
 - create minimal photon interpreter in python
 - write lexer/parser/compiler for photon in photon
 - run the compiler on the interpreter to create compiled photon compiler
-- functions are values
+- functions are values/closures
+- no classes just interfaces
 - compile to c++
 - function compile to functor class
 - pratt parser for expressions
+- datatypes literals directly compatible with JSON
+- generators/iterators
+- variable arguments
+- default arguments
+
+types
+    int    (immutable, by value)
+    float  (immutable, by value)
+    string (immutable, by value)
+    bytes (mutable, by reference
+    dict (mutable and immutable, by reference)
+    list  (mutable and immutable, by reference)
+    struct (mutable and immutable, by reference)
+    interface (dict of name=>function or value)
