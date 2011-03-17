@@ -1,7 +1,9 @@
 from tokens import *
 from ast import *
+import jast
 
 from scanner import PhotonScanner
+from compiler import Compiler
 
 class PhotonParser(object):
     def __init__(self, scanner):
@@ -125,8 +127,9 @@ class PhotonStatementParser(PhotonExpressionParser):
 scanner = PhotonScanner('src/test.js')
 parser = PhotonStatementParser(scanner)
 module = parser.parse_module()
-pp = PrettyPrinter()
-print pp.pretty_print(module)
+
+compiler = Compiler()
+compiler.compile(module)
 
 #scanner = PhotonScanner('src/expr.js')
 #parser = PhotonExpressionParser(scanner)
