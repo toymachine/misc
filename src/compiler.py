@@ -4,11 +4,22 @@ import jast
 
 class Compiler(object):
 
+    def __init__(self):
+        self.p_function_stack = []
+
     def visit_FunctionStatement(self, p_function):
+
+        self.p_function_stack.append(p_function)
+
+        #print self.p_function_stack
+
         j_funclass = jast.Class(p_function.name)
         j_funclass.modifiers.append("public")
         j_funclass.modifiers.append("static")
         j_funclass.implements.append("Function")
+
+        #constructor (for closure)
+        j_constructor = jast.Method(p_function.name, type = None, modifiers = ['public'])
 
         #call method
         j_callmethod = jast.Method('call', type = 'int', modifiers = ['public'])
@@ -18,11 +29,15 @@ class Compiler(object):
         for statement in p_function.statements:
             j_callmethod.statements.append(statement.accept(self))
 
+        j_funclass.methods.append(j_constructor)
         j_funclass.methods.append(j_callmethod)
 
         self.j_funclasses.append(j_funclass)
 
+        #create the closure and catch the environment
         j_assignment = jast.AssignmentExpression(jast.VariableExpression('v_' + p_function.name), jast.NewExpression(p_function.name), p_function.name)
+
+        self.p_function_stack.pop()
 
         return j_assignment
 

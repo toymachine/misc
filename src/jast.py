@@ -295,7 +295,7 @@ class JavaSerializer(Serializer):
         throwStatement.expression.accept(self)
 
     def visit_BlockExpression(self, blockExpression):
-        self.emitBlock(blockExpression.statements)
+        self.emit_block(blockExpression.statements)
 
     def visit_NewExpression(self, newExpression):
         self.emit("new " + newExpression.type)
@@ -328,12 +328,12 @@ class JavaSerializer(Serializer):
         self.emit(" ) ")
         self.nl()
         if ifStatement.statementsTrue:
-            self.emitBlock(ifStatement.statementsTrue)
+            self.emit_block(ifStatement.statementsTrue)
         if ifStatement.statementsFalse:
             self.nl()
             self.emit("else ")
             self.nl()
-            self.emitBlock(ifStatement.statementsFalse)
+            self.emit_block(ifStatement.statementsFalse)
 
     def visit_SwitchStatement(self, switchStatement):
         self.emit("switch( ")
@@ -347,19 +347,19 @@ class JavaSerializer(Serializer):
             self.emit("case ")
             condition.accept(self)
             self.emit(": ")
-            self.emitBlock(statements)
+            self.emit_block(statements)
             self.nl()
 
         if switchStatement.defaultCase:
             self.emit("default: ")
-            self.emitBlock(switchStatement.defaultCase)
+            self.emit_block(switchStatement.defaultCase)
             self.nl()
 
         self.emit("}")
 
     def visit_TryCatchStatement(self, tryCatchStatement):
         self.emit("try ")
-        self.emitBlock(tryCatchStatement.statements)
+        self.emit_block(tryCatchStatement.statements)
         for className, variableName, statements in tryCatchStatement.catches:
             self.nl()
             self.emit("catch(")
@@ -367,7 +367,7 @@ class JavaSerializer(Serializer):
             self.emit(" ")
             self.emit(variableName)
             self.emit(") ")
-            self.emitBlock(statements)
+            self.emit_block(statements)
 
     def visit_ForStatement(self, forStatement):
         self.emit("for(")
@@ -377,17 +377,17 @@ class JavaSerializer(Serializer):
         self.emit("; ")
         if forStatement.increment: forStatement.increment.accept(self)
         self.emit(") ")
-        self.emitBlock(forStatement.statements)
+        self.emit_block(forStatement.statements)
 
     def visit_WhileStatement(self, whileStatement):
         self.emit("while(")
         whileStatement.condition.accept(self)
         self.emit(") ")
-        self.emitBlock(whileStatement.statements)
+        self.emit_block(whileStatement.statements)
 
     def visit_DoStatement(self, doStatement):
         self.emit("do ")
-        self.emitBlock(doStatement.statements)
+        self.emit_block(doStatement.statements)
         self.emit(" while (")
         doStatement.condition.accept(self)
         self.emit(")")
@@ -398,7 +398,7 @@ class JavaSerializer(Serializer):
     def visit_BreakStatement(self, breakStatement):
         self.emit("break")
 
-    def emitBlock(self, statements):
+    def emit_block(self, statements):
         self.emit("{")
         self.inc()
         for statement in statements:
@@ -430,7 +430,7 @@ class JavaSerializer(Serializer):
 
     def visit_Method(self, method):
         self.emitModifiers(method.modifiers)
-        self.emit(method.type + " " + method.name + "(")
+        self.emit((method.type + " " if method.type is not None else '') + method.name + "(")
         self.start_list()
         for param in method.parameters:
             self.start_item()
@@ -443,7 +443,7 @@ class JavaSerializer(Serializer):
         self.end_list()
         self.emit(")")
         self.nl()
-        self.emitBlock(method.statements)
+        self.emit_block(method.statements)
 
     def visit_Class(self, clazz):
         self.nl()
