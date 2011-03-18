@@ -1,8 +1,8 @@
 from serializer import Serializer
 
 class Node(object):
-    def __accept__(self, visitor):
-        return getattr(visitor, 'visit' + self.__class__.__name__)(self)
+    def accept(self, visitor):
+        return getattr(visitor, 'visit_' + self.__class__.__name__)(self)
 
 class Module(Node):
     pass
@@ -13,10 +13,10 @@ class Statement(Node):
 class Expression(Node):
     pass
 
-class FunctionStmt(Statement):
+class FunctionStatement(Statement):
     pass
 
-class ReturnStmt(Statement):
+class ReturnStatement(Statement):
     pass
 
 class BinaryExpression(Expression):
@@ -37,28 +37,28 @@ class PrettyPrinter(Serializer):
     def __init__(self):
         Serializer.__init__(self)
 
-    def visitModule(self, module):
+    def visit_Module(self, module):
         for statement in module.statements:
-            statement.__accept__(self)
+            statement.accept(self)
 
-    def visitIntegerLiteralExpression(self, integer_literal_expression):
+    def visit_IntegerLiteralExpression(self, integer_literal_expression):
         self.emit(integer_literal_expression.value)
 
-    def visitIdentifierExpression(self, identifier_expression):
+    def visit_IdentifierExpression(self, identifier_expression):
         self.emit(identifier_expression.identifier)
 
-    def visitBinaryExpression(self, binary_expression):
+    def visit_BinaryExpression(self, binary_expression):
         self.emit('(')
-        binary_expression.left.__accept__(self)
+        binary_expression.left.accept(self)
         self.emit(binary_expression.operator)
-        binary_expression.right.__accept__(self)
+        binary_expression.right.accept(self)
         self.emit(')')
 
-    def visitReturnStmt(self, return_statement):
+    def visit_ReturnStatement(self, return_statement):
         self.emit("return ")
-        return_statement.expression.__accept__(self)
+        return_statement.expression.accept(self)
 
-    def visitFunctionStmt(self, function_statement):
+    def visit_FunctionStatement(self, function_statement):
         self.emit("function " + function_statement.name + "(")
         self.start_list()
         for arg_type, arg_name in function_statement.arguments:
@@ -72,7 +72,7 @@ class PrettyPrinter(Serializer):
         self.inc()
         self.nl()
         for statement in function_statement.statements:
-            statement.__accept__(self)
+            statement.accept(self)
         self.dec()
         self.nl()
         self.emit("}")
@@ -81,6 +81,6 @@ class PrettyPrinter(Serializer):
 
     def pretty_print(self, node):
         self.start()
-        node.__accept__(self)
+        node.accept(self)
         return self.end()
 

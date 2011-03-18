@@ -1,18 +1,17 @@
 import types
 from serializer import Serializer
 
-class ASTObject(object):
-    def __visit__(self, visitor):
-        acceptorName = 'accept' + self.__class__.__name__
-        getattr(visitor, acceptorName)(self)
+class Node(object):
+    def accept(self, visitor):
+        return getattr(visitor, 'visit_' + self.__class__.__name__)(self)
 
-class Module(ASTObject):
+class Module(Node):
     def __init__(self):
         self.package = ''
         self.imports = []
         self.classes = []
 
-class Class(ASTObject):
+class Class(Node):
     def __init__(self, name = ''):
         self.name = name
         self.methods = []
@@ -22,7 +21,7 @@ class Class(ASTObject):
         self.extends = []
         self.implements = []
 
-class Method(ASTObject):
+class Method(Node):
     def __init__(self, name = '', type = 'Object', modifiers = None, parameters = None, statements = None):
         self.name = name
         self.type = type
@@ -30,13 +29,13 @@ class Method(ASTObject):
         self.parameters = parameters if parameters is not None else []
         self.statements = statements if statements is not None else []
 
-class Parameter(ASTObject):
+class Parameter(Node):
     def __init__(self, name = '', type = 'Object', isArray = False):
         self.name = name
         self.type = type
         self.isArray = isArray
 
-class Statement(ASTObject):
+class Statement(Node):
     def __init__(self):
         pass
 
@@ -85,11 +84,11 @@ class SwitchStatement(Statement):
         self.switchCases = []
         self.defaultCase = None
 
-class Expression(ASTObject):
+class Expression(Node):
     def __init__(self):
         self.type = 'Object'
 
-class Unknown(ASTObject):
+class Unknown(Node):
     def __init__(self, msg):
         self.msg = msg
 
@@ -181,38 +180,38 @@ class JavaSerializer(Serializer):
     def __init__(self):
         Serializer.__init__(self)
 
-    def acceptUnknown(self, unknown):
+    def visit_Unknown(self, unknown):
         self.emit('unknown: %s' % unknown.msg)
 
-    def acceptLiteralBool(self, literalBool):
+    def visit_LiteralBool(self, literalBool):
         if literalBool.value:
             self.emit("true")
         else:
             self.emit("false")
 
-    def acceptLiteralInteger(self, literalInteger):
+    def visit_LiteralInteger(self, literalInteger):
         self.emit(literalInteger.value)
 
-    def acceptLiteralString(self, literalString):
+    def visit_LiteralString(self, literalString):
         self.emit('"%s"' % literalString.value)
 
-    def acceptLiteralDouble(self, literalDouble):
+    def visit_LiteralDouble(self, literalDouble):
         self.emit(repr(literalDouble.value))
 
-    def acceptLiteralNull(self, literalDouble):
+    def visit_LiteralNull(self, literalDouble):
         self.emit("null")
 
-    def acceptInitializerList(self, initializerList):
+    def visit_InitializerList(self, initializerList):
         self.emit("{")
         self.start_list()
         for expression in initializerList.expressions:
             self.start_item()
-            expression.__visit__(self)
+            expression.accept(self)
             self.end_item()
         self.end_list()
         self.emit("}")
 
-    def acceptMethodInvocationExpression(self, methodInvocationExpression):
+    def visit_MethodInvocationExpression(self, methodInvocationExpression):
         if methodInvocationExpression.target is None:
             pass
         elif isinstance(methodInvocationExpression.target, types.StringTypes):
@@ -222,83 +221,83 @@ class JavaSerializer(Serializer):
             else:
                 self.emit(".")
         else:
-            methodInvocationExpression.target.__visit__(self)
+            methodInvocationExpression.target.accept(self)
             self.emit(".")
         self.emit(methodInvocationExpression.name)
         self.emit("(")
         self.start_list()
         for parameter in methodInvocationExpression.parameters:
             self.start_item()
-            parameter.__visit__(self)
+            parameter.accept(self)
             self.end_item()
         self.end_list()
         self.emit(")")
 
-    def acceptInstanceOfExpression(self, instanceOfExpression):
-        instanceOfExpression.expression.__visit__(self)
+    def visit_InstanceOfExpression(self, instanceOfExpression):
+        instanceOfExpression.expression.accept(self)
         self.emit(" instanceof ")
         self.emit(instanceOfExpression.type)
 
-    def acceptBinaryExpression(self, binaryExpression):
+    def visit_BinaryExpression(self, binaryExpression):
         self.emit("(")
-        binaryExpression.left.__visit__(self)
+        binaryExpression.left.accept(self)
         self.emit(" ")
-        self.emit(binaryExpression.op)
+        self.emit(binaryExpression.operator)
         self.emit(" ")
-        binaryExpression.right.__visit__(self)
+        binaryExpression.right.accept(self)
         self.emit(")")
 
-    def acceptUnaryExpression(self, unaryExpression):
-        self.emit(unaryExpression.op)
+    def visit_UnaryExpression(self, unaryExpression):
+        self.emit(unaryExpression.operator)
         self.emit(" ")
-        unaryExpression.expression.__visit__(self)
+        unaryExpression.expression.accept(self)
 
-    def acceptConditionalExpression(self, conditionalExpression):
-        conditionalExpression.condition.__visit__(self)
+    def visit_ConditionalExpression(self, conditionalExpression):
+        conditionalExpression.condition.accept(self)
         self.emit(" ? ")
-        conditionalExpression.expressionTrue.__visit__(self)
+        conditionalExpression.expressionTrue.accept(self)
         self.emit(" : ")
-        conditionalExpression.expressionFalse.__visit__(self)
+        conditionalExpression.expressionFalse.accept(self)
 
-    def acceptPostOpExpression(self, postOpExpression):
-        postOpExpression.variable.__visit__(self)
-        self.emit(postOpExpression.op)
+    def visit_PostOpExpression(self, postOpExpression):
+        postOpExpression.variable.accept(self)
+        self.emit(postOpExpression.operator)
 
-    def acceptPreOpExpression(self, preOpExpression):
-        self.emit(preOpExpression.op)
-        preOpExpression.variable.__visit__(self)
+    def visit_PreOpExpression(self, preOpExpression):
+        self.emit(preOpExpression.operator)
+        preOpExpression.variable.accept(self)
 
-    def acceptAssignmentExpression(self, assignmentExpression):
+    def visit_AssignmentExpression(self, assignmentExpression):
         if assignmentExpression.type:
             self.emit(assignmentExpression.type)
             self.emit(' ')
-        assignmentExpression.variable.__visit__(self)
+        assignmentExpression.variable.accept(self)
         self.emit(' = ')
-        assignmentExpression.expression.__visit__(self)
+        assignmentExpression.expression.accept(self)
 
-    def acceptVariableExpression(self, variableExpression):
+    def visit_VariableExpression(self, variableExpression):
         if variableExpression.target:
             self.emit(variableExpression.target)
             self.emit('.')
         self.emit(variableExpression.name)
 
-    def acceptEvalExprStatement(self, evalExprStatement):
-        evalExprStatement.expression.__visit__(self)
+    def visit_EvalExprStatement(self, evalExprStatement):
+        evalExprStatement.expression.accept(self)
 
-    def acceptReturnStatement(self, returnStatement):
+    def visit_ReturnStatement(self, returnStatement):
         self.emit("return");
         if returnStatement.expression:
             self.emit(" ")
-            returnStatement.expression.__visit__(self)
+            returnStatement.expression.accept(self)
 
-    def acceptThrowStatement(self, throwStatement):
+    def visit_ThrowStatement(self, throwStatement):
         self.emit("throw ");
-        throwStatement.expression.__visit__(self)
+        throwStatement.expression.accept(self)
 
-    def acceptBlockExpression(self, blockExpression):
+    def visit_BlockExpression(self, blockExpression):
         self.emitBlock(blockExpression.statements)
 
-    def acceptNewExpression(self, newExpression):
+    def visit_NewExpression(self, newExpression):
         self.emit("new " + newExpression.type)
         if newExpression.isArray:
             self.emit("[]")
@@ -307,25 +306,25 @@ class JavaSerializer(Serializer):
             self.start_list()
             for parameter in newExpression.parameters:
                 self.start_item()
-                parameter.__visit__(self)
+                parameter.accept(self)
                 self.end_item()
             self.end_list()
             self.emit(")")
         if newExpression.initializer:
             self.emit(" ")
-            newExpression.initializer.__visit__(self)
+            newExpression.initializer.accept(self)
 
-    def acceptCastExpression(self, castExpression):
+    def visit_CastExpression(self, castExpression):
         self.emit("(")
         self.emit("(")
         self.emit(castExpression.target)
         self.emit(")")
-        castExpression.expression.__visit__(self)
+        castExpression.expression.accept(self)
         self.emit(")")
 
-    def acceptIfStatement(self, ifStatement):
+    def visit_IfStatement(self, ifStatement):
         self.emit("if( ")
-        ifStatement.expression.__visit__(self)
+        ifStatement.expression.accept(self)
         self.emit(" ) ")
         self.nl()
         if ifStatement.statementsTrue:
@@ -336,9 +335,9 @@ class JavaSerializer(Serializer):
             self.nl()
             self.emitBlock(ifStatement.statementsFalse)
 
-    def acceptSwitchStatement(self, switchStatement):
+    def visit_SwitchStatement(self, switchStatement):
         self.emit("switch( ")
-        switchStatement.condition.__visit__(self)
+        switchStatement.condition.accept(self)
         self.emit(" ) ")
         self.nl()
         self.emit("{")
@@ -346,7 +345,7 @@ class JavaSerializer(Serializer):
 
         for condition, statements in switchStatement.switchCases:
             self.emit("case ")
-            condition.__visit__(self)
+            condition.accept(self)
             self.emit(": ")
             self.emitBlock(statements)
             self.nl()
@@ -358,7 +357,7 @@ class JavaSerializer(Serializer):
 
         self.emit("}")
 
-    def acceptTryCatchStatement(self, tryCatchStatement):
+    def visit_TryCatchStatement(self, tryCatchStatement):
         self.emit("try ")
         self.emitBlock(tryCatchStatement.statements)
         for className, variableName, statements in tryCatchStatement.catches:
@@ -370,33 +369,33 @@ class JavaSerializer(Serializer):
             self.emit(") ")
             self.emitBlock(statements)
 
-    def acceptForStatement(self, forStatement):
+    def visit_ForStatement(self, forStatement):
         self.emit("for(")
-        if forStatement.init: forStatement.init.__visit__(self)
+        if forStatement.init: forStatement.init.accept(self)
         self.emit("; ")
-        if forStatement.condition: forStatement.condition.__visit__(self)
+        if forStatement.condition: forStatement.condition.accept(self)
         self.emit("; ")
-        if forStatement.increment: forStatement.increment.__visit__(self)
+        if forStatement.increment: forStatement.increment.accept(self)
         self.emit(") ")
         self.emitBlock(forStatement.statements)
 
-    def acceptWhileStatement(self, whileStatement):
+    def visit_WhileStatement(self, whileStatement):
         self.emit("while(")
-        whileStatement.condition.__visit__(self)
+        whileStatement.condition.accept(self)
         self.emit(") ")
         self.emitBlock(whileStatement.statements)
 
-    def acceptDoStatement(self, doStatement):
+    def visit_DoStatement(self, doStatement):
         self.emit("do ")
         self.emitBlock(doStatement.statements)
         self.emit(" while (")
-        doStatement.condition.__visit__(self)
+        doStatement.condition.accept(self)
         self.emit(")")
 
-    def acceptContinueStatement(self, continueStatement):
+    def visit_ContinueStatement(self, continueStatement):
         self.emit("continue")
 
-    def acceptBreakStatement(self, breakStatement):
+    def visit_BreakStatement(self, breakStatement):
         self.emit("break")
 
     def emitBlock(self, statements):
@@ -404,7 +403,7 @@ class JavaSerializer(Serializer):
         self.inc()
         for statement in statements:
             self.nl()
-            statement.__visit__(self)
+            statement.accept(self)
             #only put ; after statement if it is not a block statement
             if not isinstance(statement, BLOCK_STATEMENTS):
                 self.emit(";")
@@ -412,7 +411,7 @@ class JavaSerializer(Serializer):
         self.nl()
         self.emit("}")
 
-    def acceptModule(self, module):
+    def visit_Module(self, module):
         if module.package:
             self.emit("package %s;" % module.package)
             self.nl()
@@ -422,14 +421,14 @@ class JavaSerializer(Serializer):
             self.nl()
         self.nl()
         for clazz in module.classes:
-            clazz.__visit__(self)
+            clazz.accept(self)
 
     def emitModifiers(self, modifiers):
         if modifiers:
             self.emit(' '.join(modifiers) + ' ')
 
 
-    def acceptMethod(self, method):
+    def visit_Method(self, method):
         self.emitModifiers(method.modifiers)
         self.emit(method.type + " " + method.name + "(")
         self.start_list()
@@ -446,7 +445,7 @@ class JavaSerializer(Serializer):
         self.nl()
         self.emitBlock(method.statements)
 
-    def acceptClass(self, clazz):
+    def visit_Class(self, clazz):
         self.nl()
         self.emitModifiers(clazz.modifiers)
         self.emit("class " + clazz.name)
@@ -464,7 +463,7 @@ class JavaSerializer(Serializer):
             self.emit(field)
             if init:
                 self.emit(" = ")
-                init.__visit__(self)
+                init.accept(self)
             self.emit(';')
             self.dec()
         if clazz.fields:
@@ -472,12 +471,12 @@ class JavaSerializer(Serializer):
 
         for innerClass in clazz.innerClasses:
             self.nl()
-            innerClass.__visit__(self)
+            innerClass.accept(self)
 
         for method in clazz.methods:
             self.nl()
-            method.__visit__(self)
-       
+            method.accept(self)
+
         self.dec()
         self.nl()
         self.emit("}")
@@ -485,7 +484,7 @@ class JavaSerializer(Serializer):
     def serialize(self, module):
         try:
             self.start()
-            module.__visit__(self)
+            module.accept(self)
             return self.end()
         except:
             print self.buffers

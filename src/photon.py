@@ -1,6 +1,7 @@
 from tokens import *
 from ast import *
 import jast
+import sys
 
 from scanner import PhotonScanner
 from compiler import Compiler
@@ -58,7 +59,7 @@ class PhotonExpressionParser(PhotonParser):
 
 class PhotonStatementParser(PhotonExpressionParser):
     def parse_return_statement(self):
-        statement = ReturnStmt()
+        statement = ReturnStatement()
         self.next(Token.KEYWORD_RETURN)
         statement.expression = self.parse_expression()
         return statement
@@ -85,7 +86,7 @@ class PhotonStatementParser(PhotonExpressionParser):
 
     def parse_function(self):
         self.next(Token.KEYWORD_FUNCTION)
-        node = FunctionStmt()
+        node = FunctionStatement()
         token = self.next()
         if not token.is_identifier():
             raise SyntaxError("expected identifier, got: %s" % token)
@@ -124,7 +125,7 @@ class PhotonStatementParser(PhotonExpressionParser):
         node.statements = statements
         return node
 
-scanner = PhotonScanner('src/test.js')
+scanner = PhotonScanner(sys.argv[1])
 parser = PhotonStatementParser(scanner)
 module = parser.parse_module()
 

@@ -4,7 +4,7 @@ import jast
 
 class Compiler(object):
 
-    def visitFunctionStmt(self, p_function):
+    def visit_FunctionStatement(self, p_function):
         j_funclass = jast.Class(p_function.name)
         j_funclass.modifiers.append("public")
         j_funclass.modifiers.append("static")
@@ -16,7 +16,7 @@ class Compiler(object):
             j_callmethod.parameters.append(jast.Parameter(parameter_name, parameter_type))
 
         for statement in p_function.statements:
-            j_callmethod.statements.append(statement.__accept__(self))
+            j_callmethod.statements.append(statement.accept(self))
 
         j_funclass.methods.append(j_callmethod)
 
@@ -26,22 +26,22 @@ class Compiler(object):
 
         return j_assignment
 
-    def visitIntegerLiteralExpression(self, p_literalexpr):
+    def visit_IntegerLiteralExpression(self, p_literalexpr):
         return jast.LiteralInteger(p_literalexpr.value)
 
-    def visitIdentifierExpression(self, p_identexpr):
+    def visit_IdentifierExpression(self, p_identexpr):
         return jast.VariableExpression(p_identexpr.identifier)
 
-    def visitBinaryExpression(self, p_binexpr):
+    def visit_BinaryExpression(self, p_binexpr):
         j_binexpr = jast.BinaryExpression()
-        j_binexpr.left = p_binexpr.left.__accept__(self)
-        j_binexpr.op = p_binexpr.operator
-        j_binexpr.right = p_binexpr.right.__accept__(self)
+        j_binexpr.left = p_binexpr.left.accept(self)
+        j_binexpr.operator = p_binexpr.operator
+        j_binexpr.right = p_binexpr.right.accept(self)
         return j_binexpr
 
-    def visitReturnStmt(self, p_returnstmt):
+    def visit_ReturnStatement(self, p_returnstmt):
         j_returnstmt = jast.ReturnStatement()
-        j_returnstmt.expression = p_returnstmt.expression.__accept__(self)
+        j_returnstmt.expression = p_returnstmt.expression.accept(self)
         return j_returnstmt
 
     def compile(self, module):
@@ -56,8 +56,8 @@ class Compiler(object):
         self.j_funclasses = []
 
         for statement in module.statements:
-            assert isinstance(statement, ast.FunctionStmt)
-            statement.__accept__(self)            
+            assert isinstance(statement, ast.FunctionStatement)
+            statement.accept(self)
 
         j_moduleclass = jast.Class("Test")
         j_moduleclass.modifiers.append("public")
