@@ -1,0 +1,79 @@
+import(<java.text.SimpleDateFormat>) //import is a function that accepts a symbol
+import(<java.text.*>)
+
+SDF_MONTH = SimpleDateFormat("yyyy-MM")
+GRAPH_PARTS = enum(<PHOTO>, <REST>, <MOBILE>) //symbols (what prefix to use? #, :, $
+
+main = function() {
+
+    print("hello World!")
+
+    m = with(open("/home/henk/tmp/montlyuniques.txt"), function(f) {
+        return {}.put(map(f, function(line) {
+            return line.split('\t'), lineSplit[0].split('_') 
+        }))
+    }
+
+    dates = map(m.keys(), SDF_MONTH.format)
+    
+    chart = {
+        <caption>: "Seconds per part (stacked)",
+        <xaxisname>: "Month",
+        <yaxisname>: "Seconds",
+        <showvalues>: "0",
+        <animation>: "0"
+    }
+
+    data = {}.put("chart", chart)
+
+    parts_seconds = map(GRAPH_PARTS, function(part) {
+        return map(dates, function(date) {   
+            return jpath_getint(d[date], "$.partsSeconds." + part)
+        })
+    })
+
+    parts_series = map(GRAPH_PARTS, function(part) {
+        return (data_series(GAMMA, seconds, part)
+    })
+
+    parts_total_seconds = multimap(parts_series, function(column) {
+        return sum(column)
+    })
+    
+    //auto close resources with resource context managers
+    with(open("data3.js", "w"), function(f) {
+        f.write("chartdata(" + gson.toJson(data) + ")")
+    })
+
+    //for is a function
+    for(range(10), function(i) {
+        print(i)
+    })
+
+    //but each on a sequence is also possible
+    range(10).each(function(i) {
+    })
+
+    //while(true) = 
+    for(range(), function() {
+        if(bla) {
+            return false; //will break out of the loop?
+        }
+    })
+
+    range().each(function(i) {
+        if(bla) {
+            return false; //will break out of the loop?
+        }
+    })
+    
+    //or use each on a sequence
+    range(10).each(function(i) {
+        print(i)
+    })
+
+    //range() ;sequence from 0 -> eternity
+    //range(10) ; sequence [0, 10>
+    //range(2, 10) sequence [2, 10>
+}
+
