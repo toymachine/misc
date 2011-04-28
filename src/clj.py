@@ -27,10 +27,13 @@ class list(node):
 class vector(list):
     pass
 
-class hint(node):
+class mod(list):
     pass
 
-hint.INDENT = hint()
+class block(list):
+    def __init__(self, inc, elements):
+        self.inc = inc
+        list.__init__(self, elements)
 
 class PrettyPrinter(Serializer):
     def __init__(self):
@@ -56,11 +59,28 @@ class PrettyPrinter(Serializer):
         self.end_list(' ')
         self.emit(')')
 
+    def visit_block(self, block):
+        self.inc(block.inc)
+        for item in block:
+            self.nl()
+            item.accept(self)
+
+    def visit_defn(self, defn):
+        self.visit_list(defn)
+        self.level = 0
+
     def visit_intliteral(self, literal):
         self.emit(literal.value)
 
     def visit_ident(self, ident):
         self.emit(ident.name)
+
+    def visit_mod(self, mod):
+        for item in mod:
+            item.accept(self)
+            self.level = 0
+            self.nl()
+            self.nl()
 
     def pretty_print(self, node):
         self.start()
@@ -71,5 +91,16 @@ class PrettyPrinter(Serializer):
 DEFN = ident("defn")
 DO = ident("do")
 
+if __name__ == '__main__':
+    pp = PrettyPrinter()
+    f1 = list([DEFN, ident("test"), vector([ident('a'), ident('b')]),
+               block(1, [list([ident('+'), ident('a'), ident('b')]),
+                         list([ident('+'), ident('a'), ident('b')])])])
 
+    f2 = list([DO] +
+              [block(1, [list([ident('+'), ident('a'), ident('b')]),
+                         list([ident('+'), ident('a'), ident('b')])])])
+
+    mod = mod([f1, f2])
+    print pp.pretty_print(mod)
 

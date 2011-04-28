@@ -1,5 +1,4 @@
 import ast
-import jast
 import clj
 
 class Compiler(object):
@@ -11,9 +10,9 @@ class Compiler(object):
 
         clj_parameters = [clj.ident(parameter_name) for (_, parameter_name) in p_function.parameters]
 
-        clj_statements = clj.list([clj.DO] + [statement.accept(self) for statement in p_function.statements])
+        clj_statements = clj.block(1, clj.list([statement.accept(self) for statement in p_function.statements]))
 
-        clj_cfunc = clj.list([clj.DEFN, clj.ident(p_function.name), clj.vector(clj_parameters), clj.linelist(clj_statements)])
+        clj_cfunc = clj.list([clj.DEFN, clj.ident(p_function.name), clj.vector(clj_parameters), clj_statements])
 
         return clj_cfunc
 
@@ -36,8 +35,7 @@ class Compiler(object):
 
     def compile(self, module):
 
-
-        clj_module = clj.list()
+        clj_module = clj.mod([])
         for statement in module.statements:
             assert isinstance(statement, ast.FunctionStatement)
             clj_module.append(statement.accept(self))

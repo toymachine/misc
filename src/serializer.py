@@ -32,8 +32,8 @@ class Serializer(object):
     def dec(self):
         self.level -= 1
 
-    def inc(self):
-        self.level += 1
+    def inc(self, increment = 1):
+        self.level += increment
 
     def nl(self):
         self.emit('\n' + ('\t' * self.level))
