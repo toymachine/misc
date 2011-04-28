@@ -13,7 +13,7 @@ class Compiler(object):
 
         clj_statements = clj.list([clj.DO] + [statement.accept(self) for statement in p_function.statements])
 
-        clj_cfunc = clj.list([clj.DEFN, clj.ident(p_function.name), clj.vector(clj_parameters), clj_statements])
+        clj_cfunc = clj.list([clj.DEFN, clj.ident(p_function.name), clj.vector(clj_parameters), clj.linelist(clj_statements)])
 
         return clj_cfunc
 
