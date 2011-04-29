@@ -45,7 +45,11 @@ def createCallExpression(s, l, t):
 
 x = """
 function sum(a, b) {
-    return a + b * c * d + sum(10, 20)
+    return a + b
+}
+
+function minus(a, b) {
+    return a - b * sum(a, b)
 }
 """
 
@@ -97,18 +101,18 @@ module.setParseAction(createModule)
 module.enablePackrat()
 
 # parse input string
-print x
-print "->"
+#print x
+#print "->"
 
 module_ast = module.parseString(x)[0]
 pp = PrettyPrinter()
-print pp.pretty_print(module_ast)
-print "->"
+#print pp.pretty_print(module_ast)
+#print "->"
 
 compiler = Compiler()
 compiler.compile(module_ast)
 
-
+print "(println (minus 10 20))"
 
 
 
