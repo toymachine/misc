@@ -22,13 +22,30 @@ def createReturnStatement(s, l, t):
 def createIdentifierExpression(s, l, t):
     return IdentifierExpression(t[0])
 
-def createBinaryExpression(s, l, t):
-    return BinaryExpression(t[0][0], t[0][1], t[0][2])
+def createIntegerLiteralExpression(s, l, t):
+    return IntegerLiteralExpression(t[0])
 
+def createBinaryExpression(s, l, t):
+    #only in the case of LEFT ASSOC within the same pred.level, pyparsing gives us [a,+,b,+,c]
+    #instead of [[a,+,b],c]
+    #the recursive function createExpr deals with this and gives back the correct form
+    tokens = t[0].asList()
+    def createExpr(tokens):
+        if len(tokens) == 3:
+            return BinaryExpression(tokens[0], tokens[1], tokens[2])
+        else:
+            return createExpr([BinaryExpression(tokens[0], tokens[1], tokens[2])] + tokens[3:])
+    return createExpr(tokens)
+
+def createCallExpression(s, l, t):
+    node = CallExpression()
+    node.name = t[0]
+    node.arguments = t[1]
+    return node
 
 x = """
 function sum(a, b) {
-    return a + b + c
+    return a + b * c * d + sum(10, 20)
 }
 """
 
@@ -46,12 +63,14 @@ identifierExpression = identifier.copy()
 identifierExpression.setParseAction(createIdentifierExpression)
 
 integerLiteral = Regex(r"-?\d+")
+integerLiteral.setParseAction(createIntegerLiteralExpression)
 
 stringLiteral = quotedString
 
 expression = Forward()
 
 callExpression = identifier + LPAREN + Group(Optional(delimitedList(expression))) + RPAREN
+callExpression.setParseAction(createCallExpression)
 
 operand = (callExpression | identifierExpression | integerLiteral | stringLiteral)
 
@@ -59,6 +78,7 @@ expression << operatorPrecedence(operand,
     [
     (oneOf("* / %"), 2, opAssoc.LEFT, createBinaryExpression),
     (oneOf("+ -"), 2, opAssoc.LEFT, createBinaryExpression),
+    #(oneOf("@ !"), 2, opAssoc.RIGHT, createBinaryExpression), test for right assoc
     ])
 
 returnStatement = Suppress(KEYWORD_RETURN) + expression
@@ -87,6 +107,7 @@ print "->"
 
 compiler = Compiler()
 compiler.compile(module_ast)
+
 
 
 

@@ -23,6 +23,8 @@ class Compiler(object):
         #return jast.VariableExpression(p_identexpr.identifier)
         return clj.ident(p_identexpr.identifier)
 
+    def visit_CallExpression(self, p_callexpr):
+        return clj.list([clj.ident(p_callexpr.name)] + [argument.accept(self) for argument in p_callexpr.arguments])
 
     def visit_BinaryExpression(self, p_binexpr):
         left = p_binexpr.left.accept(self)

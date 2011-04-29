@@ -21,6 +21,11 @@ class FunctionStatement(Statement):
 class ReturnStatement(Statement):
     pass
 
+class CallExpression(Expression):
+    def __init__(self):
+        self.name = ""
+        self.arguments = []
+
 class BinaryExpression(Expression):
     def __init__(self, left, operator, right):
         self.left = left
@@ -30,6 +35,9 @@ class BinaryExpression(Expression):
 class IdentifierExpression(Expression):
     def __init__(self, identifier):
         self.identifier = identifier
+
+    def __repr__(self):
+        return "<ast.ident '%s'>" % self.identifier
 
 class IntegerLiteralExpression(Expression):
     def __init__(self, value):
@@ -59,6 +67,15 @@ class PrettyPrinter(Serializer):
     def visit_ReturnStatement(self, return_statement):
         self.emit("return ")
         return_statement.expression.accept(self)
+
+    def visit_CallExpression(self, call_expression):
+        self.emit(call_expression.name + "(")
+        self.start_list()
+        for argument in call_expression.arguments:
+            self.start_item()
+            argument.accept(self)
+            self.end_item()
+        self.end_list()
 
     def visit_FunctionStatement(self, function_statement):
         self.emit("function " + function_statement.name + "(")
