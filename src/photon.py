@@ -1,6 +1,5 @@
 from tokens import *
 from ast import *
-import jast
 import sys
 
 from scanner import PhotonScanner
@@ -68,11 +67,10 @@ class PhotonStatementParser(PhotonExpressionParser):
         token = self.peek()
         if token == Token.KEYWORD_RETURN:
             return self.parse_return_statement()
-        elif token == Token.KEYWORD_FUNCTION:
-            return self.parse_function()
         else:
-            self.next()
-            raise SyntaxError("expected statement, got '%s'" % token)
+            #try to parse an expression
+            self.parse_expression()
+            #raise SyntaxError("expected statement, got '%s'" % token)
 
     def parse_statement_block(self):
         self.next(Token.DELIM_LBRACE)
@@ -94,13 +92,14 @@ class PhotonStatementParser(PhotonExpressionParser):
         node.parameters = []
         token = self.next(Token.DELIM_LPAREN)
         while True:
-            token = self.next([Token.KEYWORD_INT, Token.KEYWORD_STRING])
-            parameter_type = token.value
+            #TODO optional typeing:
+            #token = self.next([Token.KEYWORD_INT, Token.KEYWORD_STRING])
+            #parameter_type = token.value
             token = self.next()
             if not token.is_identifier():
                 raise SyntaxError("expected identifier, got: %s" % token)
             parameter_name = token.value
-            node.parameters.append((parameter_type, parameter_name))
+            node.parameters.append((None, parameter_name))
             token = self.next()
             if token == Token.DELIM_RPAREN:
                 break
@@ -125,13 +124,13 @@ class PhotonStatementParser(PhotonExpressionParser):
         node.statements = statements
         return node
 
+#scanner = PhotonScanner(sys.argv[1])
+#parser = PhotonStatementParser(scanner)
+#module = parser.parse_module()
+#compiler = Compiler()
+#compiler.compile(module)
+
 scanner = PhotonScanner(sys.argv[1])
-parser = PhotonStatementParser(scanner)
-module = parser.parse_module()
-
-compiler = Compiler()
-compiler.compile(module)
-
-#scanner = PhotonScanner('src/expr.js')
-#parser = PhotonExpressionParser(scanner)
-#print parser.parse_expression()
+parser = PhotonExpressionParser(scanner)
+printer = PrettyPrinter()
+print printer.pretty_print(parser.parse_expression())

@@ -14,7 +14,9 @@ class Expression(Node):
     pass
 
 class FunctionStatement(Statement):
-    pass
+    def __init__(self):
+        self.name = ""
+        self.statements = []
 
 class ReturnStatement(Statement):
     pass
@@ -61,9 +63,11 @@ class PrettyPrinter(Serializer):
     def visit_FunctionStatement(self, function_statement):
         self.emit("function " + function_statement.name + "(")
         self.start_list()
-        for arg_type, arg_name in function_statement.arguments:
+        for param_type, param_name in function_statement.parameters:
             self.start_item()
-            self.emit(arg_type + " "  + arg_name)
+            if param_type:
+                self.emit(param_type + " ")
+            self.emit(param_name)
             self.end_item()
         self.end_list()
         self.emit(")")
