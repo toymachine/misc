@@ -95,8 +95,8 @@
 
                 <!-- symbols -->
                 <context id="symbol" end-at-line-end="true" style-ref="type">
-                    <start>&lt;</start>
-                    <end>&gt;</end>
+                    <start>@</start>
+                    <end>@</end>
                     <include>
                         <context ref="def:line-continue"/>
                         <context ref="def:escape"/>
@@ -126,6 +126,7 @@
                     <keyword>import</keyword>
                     <keyword>this</keyword>
                     <keyword>var</keyword>
+                    <keyword>val</keyword>
                     <keyword>break</keyword>
                     <keyword>case</keyword>
                     <keyword>continue</keyword>
@@ -167,12 +168,17 @@
                     <keyword>open</keyword>
                     <keyword>for</keyword>
                     <keyword>map</keyword>
+                    <keyword>reduce</keyword>
                     <keyword>put</keyword>
                     <keyword>write</keyword>
                     <keyword>print</keyword>
+                    <keyword>println</keyword>
                     <keyword>range</keyword>
                     <keyword>each</keyword>
                     <keyword>ever</keyword>
+                    <keyword>sum</keyword>
+                    <keyword>min</keyword>
+                    <keyword>max</keyword>
 
                     <keyword>decodeURI</keyword>
                     <keyword>encodeURIComponent</keyword>

@@ -19,11 +19,20 @@ def createReturnStatement(s, l, t):
     node.expression = t[0]
     return node
 
+def createBindStatement(s, l, t):
+    node = BindStatement()
+    node.name = t[1]
+    node.expr = t[2]
+    return node
+
 def createIdentifierExpression(s, l, t):
     return IdentifierExpression(t[0])
 
 def createIntegerLiteralExpression(s, l, t):
     return IntegerLiteralExpression(t[0])
+
+def createStringLiteralExpression(s, l, t):
+    return StringLiteralExpression(t[0])
 
 def createBinaryExpression(s, l, t):
     #only in the case of LEFT ASSOC within the same pred.level, pyparsing gives us [a,+,b,+,c]
@@ -43,17 +52,8 @@ def createCallExpression(s, l, t):
     node.arguments = t[1]
     return node
 
-x = """
-function sum(a, b) {
-    return a + b
-}
-
-function minus(a, b) {
-    return a - b * sum(a, b)
-}
-"""
-
 KEYWORD_FUNCTION = "function"
+KEYWORD_VAL = "val"
 KEYWORD_RETURN = "return"
 
 LPAREN = Suppress("(")
@@ -69,7 +69,8 @@ identifierExpression.setParseAction(createIdentifierExpression)
 integerLiteral = Regex(r"-?\d+")
 integerLiteral.setParseAction(createIntegerLiteralExpression)
 
-stringLiteral = quotedString
+stringLiteral = quotedString.copy()
+stringLiteral.setParseAction(createStringLiteralExpression)
 
 expression = Forward()
 
@@ -88,7 +89,12 @@ expression << operatorPrecedence(operand,
 returnStatement = Suppress(KEYWORD_RETURN) + expression
 returnStatement.setParseAction(createReturnStatement)
 
-statement = returnStatement
+bindStatement = KEYWORD_VAL + identifier + Suppress("=") + expression
+bindStatement.setParseAction(createBindStatement)
+
+exprStatement = expression
+
+statement = bindStatement | returnStatement | exprStatement
 
 block = LBRACE + Group(ZeroOrMore(statement)) + RBRACE
 
@@ -103,8 +109,9 @@ module.enablePackrat()
 # parse input string
 #print x
 #print "->"
+import sys
 
-module_ast = module.parseString(x)[0]
+module_ast = module.parseString(open(sys.argv[1]).read())[0]
 pp = PrettyPrinter()
 #print pp.pretty_print(module_ast)
 #print "->"

@@ -15,10 +15,11 @@ types
     int    (immutable, by value)
     float  (immutable, by value)
     string (immutable, by value) (also comparison by value!!)
-    bytes (mutable, by reference) (compare by?)
     dict (mutable and immutable, by reference)
     list  (mutable and immutable, by reference)
     struct (mutable and immutable, by reference)
     interface (dict of name=>function or value)
 
 A sane Java, without all the proprietary lockdown of C#, or the sheer audacious functional academic wankery that is Scala, would be my dream language. Redesign the libraries, add the basics that everyone wants: sensible first class function syntax, properties, fix generics, get rid of checked exceptions, better reflection, math operator overloading, using resource syntax. Just do that without getting in the way of what makes Java popular and you have a winner
+
+json literal syntax (dict, list, int, string, bool)

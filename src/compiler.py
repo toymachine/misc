@@ -19,12 +19,18 @@ class Compiler(object):
     def visit_IntegerLiteralExpression(self, p_literalexpr):
         return clj.intliteral(p_literalexpr.value)
 
+    def visit_StringLiteralExpression(self, p_literalexpr):
+        return clj.stringliteral(p_literalexpr.value)
+
     def visit_IdentifierExpression(self, p_identexpr):
         #return jast.VariableExpression(p_identexpr.identifier)
         return clj.ident(p_identexpr.identifier)
 
     def visit_CallExpression(self, p_callexpr):
         return clj.list([clj.ident(p_callexpr.name)] + [argument.accept(self) for argument in p_callexpr.arguments])
+
+    def visit_BindStatement(self, p_bindstmt):
+        return clj.list([clj.LET, clj.vector([clj.ident(p_bindstmt.name), p_bindstmt.expr.accept(self)])])
 
     def visit_BinaryExpression(self, p_binexpr):
         left = p_binexpr.left.accept(self)

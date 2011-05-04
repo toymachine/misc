@@ -21,6 +21,9 @@ class FunctionStatement(Statement):
 class ReturnStatement(Statement):
     pass
 
+class BindStatement(Statement):
+    pass
+
 class CallExpression(Expression):
     def __init__(self):
         self.name = ""
@@ -40,6 +43,10 @@ class IdentifierExpression(Expression):
         return "<ast.ident '%s'>" % self.identifier
 
 class IntegerLiteralExpression(Expression):
+    def __init__(self, value):
+        self.value = value
+
+class StringLiteralExpression(Expression):
     def __init__(self, value):
         self.value = value
 

@@ -14,6 +14,10 @@ class intliteral(node):
     def __init__(self, value):
         self.value = value
 
+class stringliteral(node):
+    def __init__(self, value):
+        self.value = value
+
 class list(node):
     def __init__(self, elements = None):
         self.elements = python_list(elements if elements else [])
@@ -72,6 +76,9 @@ class PrettyPrinter(Serializer):
     def visit_intliteral(self, literal):
         self.emit(literal.value)
 
+    def visit_stringliteral(self, literal):
+        self.emit(literal.value)
+
     def visit_ident(self, ident):
         self.emit(ident.name)
 
@@ -90,6 +97,7 @@ class PrettyPrinter(Serializer):
 
 DEFN = ident("defn")
 DO = ident("do")
+LET = ident("let")
 
 if __name__ == '__main__':
     pp = PrettyPrinter()

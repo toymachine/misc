@@ -1,9 +1,14 @@
 function sum(a, b) {
     val x = a
     val y = b
-    return x + y
+
+    print("hello World!")
+    println("blaat!")
+
+    return x + y + 30
 }
 
 function minus(a, b) {
     return a - b * sum(a, b)
 }
+
