@@ -1,8 +1,4 @@
-interface TestAction : HyvesAction(request) {
-
-    function showBlaat() {
-        
-    }
-
+function main()
+{
+    println("hello")
 }
-

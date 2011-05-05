@@ -49,6 +49,10 @@ class IntegerLiteralExpression(Expression):
     def __init__(self, value):
         self.value = value
 
+class ListLiteralExpression(Expression):
+    def __init__(self, exprs):
+        self.exprs = exprs
+
 class StringLiteralExpression(Expression):
     def __init__(self, value):
         self.value = value

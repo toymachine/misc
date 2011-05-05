@@ -1,12 +1,10 @@
+function plus2(n) {
+    return n + 2
+}
+
 function fac(n) {
-    val z = 3
-    if(n == 0) {
-        val x = 2
-        z - x
-    }
-    else {
-        n * fac(n - 1)
-    }
+    val l = [1,2,3,4]
+    return l
 }
 
 function main(a, b) {

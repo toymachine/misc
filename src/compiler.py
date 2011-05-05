@@ -40,6 +40,9 @@ class Compiler(object):
     def visit_IntegerLiteralExpression(self, p_literalexpr):
         return clj.intliteral(p_literalexpr.value)
 
+    def visit_ListLiteralExpression(self, p_literalexpr):
+        return clj.list([clj.VECTOR] + [expr.accept(self) for expr in p_literalexpr.exprs])
+
     def visit_StringLiteralExpression(self, p_literalexpr):
         return clj.stringliteral(p_literalexpr.value)
 

@@ -41,6 +41,9 @@ def createIntegerLiteralExpression(s, l, t):
 def createStringLiteralExpression(s, l, t):
     return StringLiteralExpression(t[0])
 
+def createListLiteralExpression(s, l, t):
+    return ListLiteralExpression(t)
+
 def createBinaryExpression(s, l, t):
     #only in the case of LEFT ASSOC within the same pred.level, pyparsing gives us [a,+,b,+,c]
     #instead of [[a,+,b],c]
@@ -69,6 +72,8 @@ LPAREN = Suppress("(")
 RPAREN = Suppress(")")
 LBRACE = Suppress("{")
 RBRACE = Suppress("}")
+LBRACK = Suppress("[")
+RBRACK = Suppress("]")
 
 identifier = Word(alphas, alphanums + '_')
 
@@ -83,10 +88,13 @@ stringLiteral.setParseAction(createStringLiteralExpression)
 
 expression = Forward()
 
+listLiteral = LBRACK + Optional(delimitedList(expression)) + RBRACK
+listLiteral.setParseAction(createListLiteralExpression)
+
 callExpression = identifier + LPAREN + Group(Optional(delimitedList(expression))) + RPAREN
 callExpression.setParseAction(createCallExpression)
 
-operand = (callExpression | identifierExpression | integerLiteral | stringLiteral)
+operand = (callExpression | identifierExpression | integerLiteral | stringLiteral | listLiteral)
 
 expression << operatorPrecedence(operand,
     [
@@ -119,6 +127,7 @@ functionDef.setParseAction(createFunctionStatement)
 module = OneOrMore(functionDef)
 module.setParseAction(createModule)
 module.enablePackrat()
+module.ignore(cppStyleComment)
 
 # parse input string
 #print x
