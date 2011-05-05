@@ -25,6 +25,13 @@ def createBindStatement(s, l, t):
     node.expr = t[2]
     return node
 
+def createIfExpression(s, l, t):
+    node = IfExpression()
+    node.expr = t[0]
+    node.trueBlock = t[1]
+    node.falseBlock = t[2]
+    return node
+
 def createIdentifierExpression(s, l, t):
     return IdentifierExpression(t[0])
 
@@ -55,6 +62,8 @@ def createCallExpression(s, l, t):
 KEYWORD_FUNCTION = "function"
 KEYWORD_VAL = "val"
 KEYWORD_RETURN = "return"
+KEYWORD_IF = "if"
+KEYWORD_ELSE = "else"
 
 LPAREN = Suppress("(")
 RPAREN = Suppress(")")
@@ -83,20 +92,25 @@ expression << operatorPrecedence(operand,
     [
     (oneOf("* / %"), 2, opAssoc.LEFT, createBinaryExpression),
     (oneOf("+ -"), 2, opAssoc.LEFT, createBinaryExpression),
-    #(oneOf("@ !"), 2, opAssoc.RIGHT, createBinaryExpression), test for right assoc
+    ("==", 2, opAssoc.LEFT, createBinaryExpression),
     ])
 
-returnStatement = Suppress(KEYWORD_RETURN) + expression
-returnStatement.setParseAction(createReturnStatement)
-
-bindStatement = KEYWORD_VAL + identifier + Suppress("=") + expression
-bindStatement.setParseAction(createBindStatement)
-
-exprStatement = expression
-
-statement = bindStatement | returnStatement | exprStatement
+statement = Forward()
 
 block = LBRACE + Group(ZeroOrMore(statement)) + RBRACE
+
+ifExpression = Suppress(KEYWORD_IF) + LPAREN + expression + RPAREN + block + Optional(Suppress(KEYWORD_ELSE) + block)
+ifExpression.setParseAction(createIfExpression)
+
+exprStatement = (ifExpression | expression)
+
+returnStatement = Suppress(KEYWORD_RETURN) + exprStatement
+returnStatement.setParseAction(createReturnStatement)
+
+bindStatement = KEYWORD_VAL + identifier + Suppress("=") + exprStatement
+bindStatement.setParseAction(createBindStatement)
+
+statement << (bindStatement | returnStatement | exprStatement)
 
 functionDef = Suppress(KEYWORD_FUNCTION) + identifier + LPAREN + Group(Optional(delimitedList(identifier))) + RPAREN + block
 functionDef.setParseAction(createFunctionStatement)

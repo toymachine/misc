@@ -98,6 +98,7 @@ class PrettyPrinter(Serializer):
 DEFN = ident("defn")
 DO = ident("do")
 LET = ident("let")
+IF = ident("if")
 
 if __name__ == '__main__':
     pp = PrettyPrinter()

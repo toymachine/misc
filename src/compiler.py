@@ -1,18 +1,37 @@
 import ast
 import clj
 
+
+
 class Compiler(object):
+
 
     def __init__(self):
         self.p_function_stack = []
+        self.dummy_id = 0
+
+    def dummy_ident(self):
+        self.dummy_id += 1
+        return clj.ident('__d%d' % self.dummy_id)
 
     def visit_FunctionStatement(self, p_function):
 
         clj_parameters = [clj.ident(parameter_name) for (_, parameter_name) in p_function.parameters]
 
-        clj_statements = clj.block(1, clj.list([statement.accept(self) for statement in p_function.statements]))
+        let_vector = clj.vector([])
+        let_list = clj.list([clj.LET, let_vector])
 
-        clj_cfunc = clj.list([clj.DEFN, clj.ident(p_function.name), clj.vector(clj_parameters), clj_statements])
+        for statement in p_function.statements[:-1]:
+            if isinstance(statement, ast.BindStatement):
+                let_vector.append(clj.ident(statement.name))
+                let_vector.append(statement.expr.accept(self))
+            else:
+                let_vector.append(self.dummy_ident())
+                let_vector.append(statement.accept(self))
+
+        let_list.append(p_function.statements[-1].accept(self))
+
+        clj_cfunc = clj.list([clj.DEFN, clj.ident(p_function.name), clj.vector(clj_parameters), let_list])
 
         return clj_cfunc
 
@@ -26,11 +45,19 @@ class Compiler(object):
         #return jast.VariableExpression(p_identexpr.identifier)
         return clj.ident(p_identexpr.identifier)
 
+    def visit_IfExpression(self, p_ifexpr):
+        def blockOrExpr(statements):
+            if len(statements) == 1:
+                return statements[0].accept(self)
+            else:
+                return clj.list([clj.DO] + [stmt.accept(self) for stmt in statements])
+        return clj.list([clj.IF, p_ifexpr.expr.accept(self), blockOrExpr(p_ifexpr.trueBlock), blockOrExpr(p_ifexpr.falseBlock)])
+
     def visit_CallExpression(self, p_callexpr):
         return clj.list([clj.ident(p_callexpr.name)] + [argument.accept(self) for argument in p_callexpr.arguments])
 
-    def visit_BindStatement(self, p_bindstmt):
-        return clj.list([clj.LET, clj.vector([clj.ident(p_bindstmt.name), p_bindstmt.expr.accept(self)])])
+    #def visit_BindStatement(self, p_bindstmt):
+    #    return clj.list([clj.LET, clj.vector([clj.ident(p_bindstmt.name), p_bindstmt.expr.accept(self)])])
 
     def visit_BinaryExpression(self, p_binexpr):
         left = p_binexpr.left.accept(self)

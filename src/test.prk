@@ -1,14 +1,14 @@
-function sum(a, b) {
-    val x = a
-    val y = b
-
-    print("hello World!")
-    println("blaat!")
-
-    return x + y + 30
+function fac(n) {
+    if(n == 0) {
+        println("n == 0")
+        println("piet kaap aa")
+        1
+    }
+    else {
+        n * fac(n - 1)
+    }
 }
 
 function minus(a, b) {
-    return a - b * sum(a, b)
+    return a - b + fac(5)
 }
-

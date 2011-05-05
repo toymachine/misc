@@ -29,6 +29,9 @@ class CallExpression(Expression):
         self.name = ""
         self.arguments = []
 
+class IfExpression(Expression):
+    pass
+
 class BinaryExpression(Expression):
     def __init__(self, left, operator, right):
         self.left = left
@@ -61,6 +64,9 @@ class PrettyPrinter(Serializer):
     def visit_IntegerLiteralExpression(self, integer_literal_expression):
         self.emit(integer_literal_expression.value)
 
+    def visit_StringLiteralExpression(self, literal_expression):
+        self.emit(literal_expression.value)
+
     def visit_IdentifierExpression(self, identifier_expression):
         self.emit(identifier_expression.identifier)
 
@@ -71,9 +77,21 @@ class PrettyPrinter(Serializer):
         binary_expression.right.accept(self)
         self.emit(')')
 
+    def visit_IfExpression(self, if_expression):
+        self.emit('if(')
+        if_expression.expr.accept(self)
+        self.emit(')')
+        self.emitBlock(if_expression.trueBlock)
+        self.emit("else")
+        self.emitBlock(if_expression.falseBlock)
+
     def visit_ReturnStatement(self, return_statement):
         self.emit("return ")
         return_statement.expression.accept(self)
+
+    def visit_BindStatement(self, bind_statement):
+        self.emit(bind_statement.name + " = ")
+        bind_statement.expr.accept(self)
 
     def visit_CallExpression(self, call_expression):
         self.emit(call_expression.name + "(")
@@ -83,6 +101,18 @@ class PrettyPrinter(Serializer):
             argument.accept(self)
             self.end_item()
         self.end_list()
+        self.emit(')')
+
+    def emitBlock(self, statements):
+        self.emit('{')
+        self.inc()
+        self.nl()
+        for statement in statements:
+            statement.accept(self)
+            self.nl()
+        self.dec()
+        self.nl()
+        self.emit("}")
 
     def visit_FunctionStatement(self, function_statement):
         self.emit("function " + function_statement.name + "(")
@@ -96,14 +126,7 @@ class PrettyPrinter(Serializer):
         self.end_list()
         self.emit(")")
         self.nl()
-        self.emit('{')
-        self.inc()
-        self.nl()
-        for statement in function_statement.statements:
-            statement.accept(self)
-        self.dec()
-        self.nl()
-        self.emit("}")
+        self.emitBlock(function_statement.statements)
         self.nl()
         self.nl()
 
