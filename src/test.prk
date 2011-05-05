@@ -1,14 +1,14 @@
 function fac(n) {
+    val z = 3
     if(n == 0) {
-        println("n == 0")
-        println("piet kaap aa")
-        1
+        val x = 2
+        z - x
     }
     else {
         n * fac(n - 1)
     }
 }
 
-function minus(a, b) {
-    return a - b + fac(5)
+function main(a, b) {
+    return fac(5)
 }

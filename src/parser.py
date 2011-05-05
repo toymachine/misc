@@ -133,7 +133,7 @@ pp = PrettyPrinter()
 compiler = Compiler()
 compiler.compile(module_ast)
 
-print "(println (minus 10 20))"
+print "(println (main 10 20))"
 
 
 

@@ -7,21 +7,17 @@ class Compiler(object):
 
 
     def __init__(self):
-        self.p_function_stack = []
         self.dummy_id = 0
 
     def dummy_ident(self):
         self.dummy_id += 1
         return clj.ident('__d%d' % self.dummy_id)
 
-    def visit_FunctionStatement(self, p_function):
-
-        clj_parameters = [clj.ident(parameter_name) for (_, parameter_name) in p_function.parameters]
-
+    def compile_block(self, statements):
         let_vector = clj.vector([])
         let_list = clj.list([clj.LET, let_vector])
 
-        for statement in p_function.statements[:-1]:
+        for statement in statements[:-1]:
             if isinstance(statement, ast.BindStatement):
                 let_vector.append(clj.ident(statement.name))
                 let_vector.append(statement.expr.accept(self))
@@ -29,9 +25,15 @@ class Compiler(object):
                 let_vector.append(self.dummy_ident())
                 let_vector.append(statement.accept(self))
 
-        let_list.append(p_function.statements[-1].accept(self))
+        let_list.append(statements[-1].accept(self))
 
-        clj_cfunc = clj.list([clj.DEFN, clj.ident(p_function.name), clj.vector(clj_parameters), let_list])
+        return let_list
+
+    def visit_FunctionStatement(self, p_function):
+
+        clj_parameters = [clj.ident(parameter_name) for (_, parameter_name) in p_function.parameters]
+
+        clj_cfunc = clj.list([clj.DEFN, clj.ident(p_function.name), clj.vector(clj_parameters), self.compile_block(p_function.statements)])
 
         return clj_cfunc
 
@@ -46,12 +48,12 @@ class Compiler(object):
         return clj.ident(p_identexpr.identifier)
 
     def visit_IfExpression(self, p_ifexpr):
-        def blockOrExpr(statements):
-            if len(statements) == 1:
-                return statements[0].accept(self)
-            else:
-                return clj.list([clj.DO] + [stmt.accept(self) for stmt in statements])
-        return clj.list([clj.IF, p_ifexpr.expr.accept(self), blockOrExpr(p_ifexpr.trueBlock), blockOrExpr(p_ifexpr.falseBlock)])
+        #def blockOrExpr(statements):
+        #    if len(statements) == 1:
+        #        return statements[0].accept(self)
+        #    else:
+        #        return clj.list([clj.DO] + [stmt.accept(self) for stmt in statements])
+        return clj.list([clj.IF, p_ifexpr.expr.accept(self), self.compile_block(p_ifexpr.trueBlock), self.compile_block(p_ifexpr.falseBlock)])
 
     def visit_CallExpression(self, p_callexpr):
         return clj.list([clj.ident(p_callexpr.name)] + [argument.accept(self) for argument in p_callexpr.arguments])
