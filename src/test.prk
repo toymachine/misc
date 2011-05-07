@@ -1,10 +1,11 @@
-function plus2(n) {
-    return n + 2
-}
 
 function fac(n) {
-    val l = [1,2,3,4]
-    return l
+    val l = range(4)
+    for(x in l) {
+        for(y in range(4)) {
+            println(x + y)
+        }
+    }
 }
 
 function main(a, b) {

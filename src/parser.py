@@ -62,11 +62,20 @@ def createCallExpression(s, l, t):
     node.arguments = t[1]
     return node
 
+def createForStatement(s, l, t):
+    node = ForStatement()
+    node.bind = t[0]
+    node.expr = t[1]
+    node.block = t[2]
+    return node
+
 KEYWORD_FUNCTION = "function"
 KEYWORD_VAL = "val"
 KEYWORD_RETURN = "return"
 KEYWORD_IF = "if"
 KEYWORD_ELSE = "else"
+KEYWORD_FOR = "for"
+KEYWORD_IN = "in"
 
 LPAREN = Suppress("(")
 RPAREN = Suppress(")")
@@ -118,7 +127,10 @@ returnStatement.setParseAction(createReturnStatement)
 bindStatement = KEYWORD_VAL + identifier + Suppress("=") + exprStatement
 bindStatement.setParseAction(createBindStatement)
 
-statement << (bindStatement | returnStatement | exprStatement)
+forStatement = Suppress(KEYWORD_FOR) + LPAREN + identifier + Suppress(KEYWORD_IN) + expression + RPAREN + block
+forStatement.setParseAction(createForStatement)
+
+statement << (bindStatement | returnStatement | forStatement | exprStatement)
 
 functionDef = Suppress(KEYWORD_FUNCTION) + identifier + LPAREN + Group(Optional(delimitedList(identifier))) + RPAREN + block
 functionDef.setParseAction(createFunctionStatement)

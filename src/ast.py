@@ -24,6 +24,9 @@ class ReturnStatement(Statement):
 class BindStatement(Statement):
     pass
 
+class ForStatement(Statement):
+    pass
+
 class CallExpression(Expression):
     def __init__(self):
         self.name = ""

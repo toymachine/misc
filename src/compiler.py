@@ -73,6 +73,9 @@ class Compiler(object):
     def visit_ReturnStatement(self, p_returnstmt):
         return p_returnstmt.expression.accept(self)
 
+    def visit_ForStatement(self, p_forstmt):
+        return clj.list([clj.ident('doseq'), clj.vector([clj.ident(p_forstmt.bind), p_forstmt.expr.accept(self)]), self.compile_block(p_forstmt.block)])
+
     def compile(self, module):
 
         clj_module = clj.mod([])
