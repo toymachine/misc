@@ -89,12 +89,17 @@ class Compiler(object):
     def visit_ForStatement(self, p_forstmt):
         return clj.list([clj.ident('doseq'), clj.vector([clj.ident(p_forstmt.bind), p_forstmt.expr.accept(self)]), self.compile_block(p_forstmt.block)])
 
+    def visit_BindStatement(self, p_bindstmt):
+        #only called at module level
+        return clj.list([clj.ident('def'), clj.ident(p_bindstmt.name), p_bindstmt.expr.accept(self)])
+
     def compile(self, module):
 
         clj_module = clj.mod([])
         for statement in module.statements:
-            assert isinstance(statement, ast.FunctionStatement)
+            assert isinstance(statement, (ast.FunctionStatement, ast.BindStatement))
             clj_module.append(statement.accept(self))
 
         pp = clj.PrettyPrinter()
         print pp.pretty_print(clj_module)
+

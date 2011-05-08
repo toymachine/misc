@@ -1,79 +1,58 @@
-import(<java.text.SimpleDateFormat>) //import is a function that accepts a symbol
-import(<java.text.*>)
+//d = dict([(date, data) for date, data in read_dailies(finput)])
 
-SDF_MONTH = SimpleDateFormat("yyyy-MM")
-GRAPH_PARTS = enum(<PHOTO>, <REST>, <MOBILE>) //symbols (what prefix to use? #, :, $
+/*
+function test0(n) {
+    val l = [0,1,2,3]
+    val d = {"test": 2, "piet": 4}
 
-function main() {
-
-    print("hello World!")
-
-    m = with(open("/home/henk/tmp/montlyuniques.txt"), function(f) {
-        return {}.put(map(f, function(line) {
-            return line.split('\t'), lineSplit[0].split('_') 
-        }))
+    for(x in l) {
+        for(y in range(4)) {
+            println(x + y)
+        }
     }
 
-    dates = map(m.keys(), SDF_MONTH.format)
-    
-    chart = {
-        <caption>: "Seconds per part (stacked)",
-        <xaxisname>: "Month",
-        <yaxisname>: "Seconds",
-        <showvalues>: "0",
-        <animation>: "0"
+    println(d)
+
+    for(a in d) {
+        println(a)
     }
 
-    data = {}.put("chart", chart)
+}
 
-    parts_seconds = map(GRAPH_PARTS, function(part) {
-        return map(dates, function(date) {   
-            return jpath_getint(d[date], "$.partsSeconds." + part)
-        })
-    })
+function test2() {
+    val l = ["a", "b", "c", "d"]
+    for(i in range(4)) {
+        println(l[i])
+    }
+}
 
-    parts_series = map(GRAPH_PARTS, function(part) {
-        return (data_series(GAMMA, seconds, part)
-    })
+function test3() {
+    val c = 30
+    //function literal:
+    val sum = function(a,b) {
+        return a + b + c
+    }
+    println(sum(10, 20))
+}
 
-    parts_total_seconds = multimap(parts_series, function(column) {
-        return sum(column)
-    })
-    
-    //auto close resources with resource context managers
-    with(open("data3.js", "w"), function(f) {
-        f.write("chartdata(" + gson.toJson(data) + ")")
-    })
-
-    //for is a function
-    for(range(10), function(i) {
-        print(i)
-    })
-
-    //but each on a sequence is also possible
-    range(10).each(function(i) {
-    })
-
-    //while(true) = 
-    for(range(), function() {
-        if(bla) {
-            return false; //will break out of the loop?
+function test4() {
+    val a = 10
+    val b = 20
+    return {
+        "sum": function() {
+            return a + b
         }
-    })
+    }
+}
+*/
 
-    range().each(function(i) {
-        if(bla) {
-            return false; //will break out of the loop?
-        }
-    })
-    
-    //or use each on a sequence
-    range(10).each(function(i) {
-        print(i)
-    })
+val x = 20
 
-    //range() ;sequence from 0 -> eternity
-    //range(10) ; sequence [0, 10>
-    //range(2, 10) sequence [2, 10>
+function test5() {
+    return 10 + x
+}
+
+function main(a, b) {
+    println(test5())
 }
 

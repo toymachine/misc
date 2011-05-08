@@ -1,0 +1,32 @@
+
+val CARD_VALUES = ["2","3","4","5","6","7","8","9","T", "J", "Q", "K", "A"]
+val CARD_SUITS = ["C", "D", "H", "S"]
+val CARD_ORDINAL = dict(map(enumerate(CARD_VALUES), function(x) => [x[1], x[0]]))
+
+function card_create(value, suit)
+{
+    return {"value": value, "suit": suit}
+}
+
+function hand_from_string(s)
+{   
+    return sort_by(map(split(s, " "), function(x) => card_create(x[0], x[1])), CARD_ORDINAL)
+}
+
+function hand_value(hand)
+{
+    val values = map(hand, function(x) => x["value"])
+    println(values)
+}
+
+function main()
+{
+    val c1 = card_create("T", "S")
+    val c2 = card_create("A", "S")
+    val c3 = card_create("T", "S")
+    val hand = hand_from_string("TS AS QS KS JS")
+    println(hand)
+    hand_value(hand)
+    println(c1)
+    println(c2)
+}

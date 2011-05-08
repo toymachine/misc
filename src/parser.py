@@ -138,6 +138,7 @@ expression << operatorPrecedence(operand, [
     (callOperator, 1, opAssoc.LEFT, createCallExpression),
     (oneOf("* / %"), 2, opAssoc.LEFT, createBinaryExpression),
     (oneOf("+ -"), 2, opAssoc.LEFT, createBinaryExpression),
+    (oneOf("> <"), 2, opAssoc.LEFT, createBinaryExpression),
     ("==", 2, opAssoc.LEFT, createBinaryExpression)])
 
 
@@ -161,7 +162,7 @@ functionDef = Suppress(KEYWORD_FUNCTION) + identifier + LPAREN + functionParamet
 functionDef.setParseAction(createFunctionStatement)
 
 # define grammar
-module = OneOrMore(functionDef)
+module = OneOrMore(functionDef | bindStatement)
 module.setParseAction(createModule)
 module.enablePackrat()
 module.ignore(cppStyleComment)
@@ -182,7 +183,7 @@ print "(use 'org.pork.core)"
 
 compiler.compile(module_ast)
 
-print "(println (main 10 20))"
+print "(main)"
 
 
 
