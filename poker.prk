@@ -10,13 +10,18 @@ function card_create(value, suit)
 
 function hand_from_string(s)
 {   
-    return sort_by(map(split(s, " "), function(x) => card_create(x[0], x[1])), CARD_ORDINAL)
+    //TODO sorted does not work.
+    return sorted_by(map(split(s, " "), function(x) => card_create(x[0], x[1])), CARD_ORDINAL)
 }
 
 function hand_value(hand)
 {
     val values = map(hand, function(x) => x["value"])
-    println(values)
+    val value_freqs = sorted(items(frequencies(values)))
+    val suits = map(hand, function(x) => x["suit"])
+    val suit_freqs = sorted(items(frequencies(suits)))
+    println(value_freqs)
+    println(suit_freqs)
 }
 
 function main()
@@ -24,7 +29,8 @@ function main()
     val c1 = card_create("T", "S")
     val c2 = card_create("A", "S")
     val c3 = card_create("T", "S")
-    val hand = hand_from_string("TS AS QS KS JS")
+    //val hand = hand_from_string("TS AS QS KS JS")
+    val hand = hand_from_string("TS TD QS QH QC")
     println(hand)
     hand_value(hand)
     println(c1)

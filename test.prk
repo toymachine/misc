@@ -52,7 +52,7 @@ function test5() {
     return 10 + x
 }
 
-function main(a, b) {
+function main() {
     println(test5())
 }
 

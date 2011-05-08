@@ -19,5 +19,11 @@
 (defn dict [s]
     (into {} s))
 
-(defn sort_by [s keyfn]
+(defn sorted_by [s keyfn]
     (sort-by keyfn s))
+
+(defn sorted [s]
+    (sort s))
+
+(defn items [m] 
+    (cljmap (fn [x y] (vector x y)) (keys m) (vals m)))
