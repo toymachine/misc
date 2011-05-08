@@ -47,6 +47,7 @@ function test4() {
 */
 
 function test5() {
+    return map([1,2,3,4], function(a) => a + 10)
 }
 
 function main(a, b) {

@@ -177,6 +177,9 @@ pp = PrettyPrinter()
 #print "->"
 
 compiler = Compiler()
+
+print "(use 'org.pork.core)"
+
 compiler.compile(module_ast)
 
 print "(println (main 10 20))"
