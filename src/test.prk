@@ -1,13 +1,30 @@
+//d = dict([(date, data) for date, data in read_dailies(finput)])
 
-function fac(n) {
-    val l = range(4)
+function test(n) {
+    val l = [0,1,2,3]
+    val d = {"test": 2, "piet": 4}
+
     for(x in l) {
         for(y in range(4)) {
             println(x + y)
         }
     }
+
+    println(d)
+
+    for(a in d) {
+        println(a)
+    }
+
+}
+
+function test2() {
+    val l = ["a", "b", "c", "d"]
+    for(i in range(4)) {
+        println(l[i])
+    }
 }
 
 function main(a, b) {
-    return fac(5)
+    return test2()
 }

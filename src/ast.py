@@ -41,6 +41,11 @@ class BinaryExpression(Expression):
         self.operator = operator
         self.right = right
 
+class SubscriptExpression(Expression):
+    def __init__(self, expr, indexExpr):
+        self.expr = expr    
+        self.indexExpr = indexExpr
+
 class IdentifierExpression(Expression):
     def __init__(self, identifier):
         self.identifier = identifier
@@ -55,6 +60,10 @@ class IntegerLiteralExpression(Expression):
 class ListLiteralExpression(Expression):
     def __init__(self, exprs):
         self.exprs = exprs
+
+class DictLiteralExpression(Expression):
+    def __init__(self, pairs):
+        self.pairs = pairs
 
 class StringLiteralExpression(Expression):
     def __init__(self, value):

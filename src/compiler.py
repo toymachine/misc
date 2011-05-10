@@ -43,6 +43,13 @@ class Compiler(object):
     def visit_ListLiteralExpression(self, p_literalexpr):
         return clj.list([clj.VECTOR] + [expr.accept(self) for expr in p_literalexpr.exprs])
 
+    def visit_DictLiteralExpression(self, p_literalexpr):
+        l = [clj.ident("hash-map")]
+        for key, val in p_literalexpr.pairs:
+            l.append(key.accept(self))
+            l.append(val.accept(self))
+        return clj.list(l)
+
     def visit_StringLiteralExpression(self, p_literalexpr):
         return clj.stringliteral(p_literalexpr.value)
 
@@ -69,6 +76,9 @@ class Compiler(object):
         operator = p_binexpr.operator
         right = p_binexpr.right.accept(self)
         return clj.list([clj.ident(operator), left, right])
+
+    def visit_SubscriptExpression(self, p_subscriptexpr):
+        return clj.list([clj.ident("get"), p_subscriptexpr.expr.accept(self), p_subscriptexpr.indexExpr.accept(self)])
 
     def visit_ReturnStatement(self, p_returnstmt):
         return p_returnstmt.expression.accept(self)

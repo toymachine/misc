@@ -44,6 +44,9 @@ def createStringLiteralExpression(s, l, t):
 def createListLiteralExpression(s, l, t):
     return ListLiteralExpression(t)
 
+def createDictLiteralExpression(s, l, t):
+    return DictLiteralExpression(t)
+
 def createBinaryExpression(s, l, t):
     #only in the case of LEFT ASSOC within the same pred.level, pyparsing gives us [a,+,b,+,c]
     #instead of [[a,+,b],c]
@@ -55,6 +58,9 @@ def createBinaryExpression(s, l, t):
         else:
             return createExpr([BinaryExpression(tokens[0], tokens[1], tokens[2])] + tokens[3:])
     return createExpr(tokens)
+
+def createSubscriptExpression(s, l, t):
+    return SubscriptExpression(t[0][0], t[0][1])
 
 def createCallExpression(s, l, t):
     node = CallExpression()
@@ -83,6 +89,7 @@ LBRACE = Suppress("{")
 RBRACE = Suppress("}")
 LBRACK = Suppress("[")
 RBRACK = Suppress("]")
+COLON = Suppress(":")
 
 identifier = Word(alphas, alphanums + '_')
 
@@ -100,17 +107,22 @@ expression = Forward()
 listLiteral = LBRACK + Optional(delimitedList(expression)) + RBRACK
 listLiteral.setParseAction(createListLiteralExpression)
 
+dictLiteralPair = Group(expression + COLON + expression)
+dictLiteral = LBRACE + Optional(delimitedList(dictLiteralPair)) + RBRACE
+dictLiteral.setParseAction(createDictLiteralExpression)
+
 callExpression = identifier + LPAREN + Group(Optional(delimitedList(expression))) + RPAREN
 callExpression.setParseAction(createCallExpression)
 
-operand = (callExpression | identifierExpression | integerLiteral | stringLiteral | listLiteral)
+operand = (callExpression | identifierExpression | integerLiteral | stringLiteral | listLiteral | dictLiteral)
 
-expression << operatorPrecedence(operand,
-    [
+subscriptOperator = LBRACK + expression + RBRACK
+
+expression << operatorPrecedence(operand, [
+    (subscriptOperator, 1, opAssoc.LEFT, createSubscriptExpression),
     (oneOf("* / %"), 2, opAssoc.LEFT, createBinaryExpression),
     (oneOf("+ -"), 2, opAssoc.LEFT, createBinaryExpression),
-    ("==", 2, opAssoc.LEFT, createBinaryExpression),
-    ])
+    ("==", 2, opAssoc.LEFT, createBinaryExpression)])
 
 statement = Forward()
 
@@ -155,6 +167,7 @@ compiler = Compiler()
 compiler.compile(module_ast)
 
 print "(println (main 10 20))"
+
 
 
 

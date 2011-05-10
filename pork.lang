@@ -123,6 +123,7 @@
                     <keyword>const</keyword>
                     <keyword>function</keyword>
                     <keyword>def</keyword>
+                    <keyword>for</keyword>
                     <keyword>import</keyword>
                     <keyword>this</keyword>
                     <keyword>var</keyword>
@@ -164,18 +165,12 @@
                 </context>
 
                 <context id="functions" style-ref="function">
-                    <keyword>with</keyword>
                     <keyword>open</keyword>
-                    <keyword>for</keyword>
                     <keyword>map</keyword>
                     <keyword>reduce</keyword>
-                    <keyword>put</keyword>
-                    <keyword>write</keyword>
                     <keyword>print</keyword>
                     <keyword>println</keyword>
                     <keyword>range</keyword>
-                    <keyword>each</keyword>
-                    <keyword>ever</keyword>
                     <keyword>sum</keyword>
                     <keyword>min</keyword>
                     <keyword>max</keyword>
@@ -298,20 +293,8 @@
                 </context>
 
                 <context id="constructors" style-ref="constructors">
-                    <keyword>Object</keyword>
-                    <keyword>Function</keyword>
-                    <keyword>Array</keyword>
-                    <keyword>String</keyword>
-                    <keyword>Boolean</keyword>
-                    <keyword>Number</keyword>
-                    <keyword>Date</keyword>
-                    <keyword>RegExp</keyword>
-                    <keyword>Error</keyword>
-                    <keyword>EvalError</keyword>
-                    <keyword>RangeError</keyword>
-                    <keyword>SyntaxError</keyword>
-                    <keyword>TypeError</keyword>
-                    <keyword>URIError</keyword>
+                    <keyword>dict</keyword>
+                    <keyword>list</keyword>
                 </context>
 
                 <context id="future-words" style-ref="future-words">
