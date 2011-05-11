@@ -1,6 +1,6 @@
 //d = dict([(date, data) for date, data in read_dailies(finput)])
 
-function test(n) {
+function test0(n) {
     val l = [0,1,2,3]
     val d = {"test": 2, "piet": 4}
 
@@ -27,12 +27,26 @@ function test2() {
 
 function test3() {
     val c = 30
+    //function literal:
     val sum = function(a,b) {
         return a + b + c
     }
     println(sum(10, 20))
 }
 
-function main(a, b) {
-    return test3()
+function test4() {
+    val a = 10
+    val b = 20
+    return {
+        "sum": function() {
+            return a + b
+        }
+    }
 }
+
+function main(a, b) {
+    val d = test4()
+    val s = d["sum"]
+    println(s())
+}
+
