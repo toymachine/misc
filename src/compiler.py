@@ -17,20 +17,26 @@ class Compiler(object):
         let_vector = clj.vector([])
         let_list = clj.list([clj.LET, let_vector])
 
-        for statement in statements[:-1]:
-            if isinstance(statement, ast.BindStatement):
-                let_vector.append(clj.ident(statement.name))
-                let_vector.append(statement.expr.accept(self))
-            else:
-                let_vector.append(self.dummy_ident())
-                let_vector.append(statement.accept(self))
+        if statements:
+            for statement in statements[:-1]:
+                if isinstance(statement, ast.BindStatement):
+                    let_vector.append(clj.ident(statement.name))
+                    let_vector.append(statement.expr.accept(self))
+                else:
+                    let_vector.append(self.dummy_ident())
+                    let_vector.append(statement.accept(self))
 
-        let_list.append(statements[-1].accept(self))
+            if isinstance(statements[-1], ast.BindStatement):
+                let_list.append(clj.ident('nil'))
+            else:
+                let_list.append(statements[-1].accept(self))
+        else:
+            let_list.append(clj.ident('nil'))
 
         return let_list
 
     def visit_FunctionStatement(self, p_function):
-
+        #print 'funcstat', p_function.statements
         clj_parameters = [clj.ident(parameter_name) for (_, parameter_name) in p_function.parameters]
         clj_cfunc = clj.list([clj.DEFN, clj.ident(p_function.name), clj.vector(clj_parameters), self.compile_block(p_function.statements)])
 
@@ -67,9 +73,6 @@ class Compiler(object):
 
     def visit_CallExpression(self, p_callexpr):
         return clj.list([p_callexpr.expr.accept(self)] + [argument.accept(self) for argument in p_callexpr.arguments])
-
-    #def visit_BindStatement(self, p_bindstmt):
-    #    return clj.list([clj.LET, clj.vector([clj.ident(p_bindstmt.name), p_bindstmt.expr.accept(self)])])
 
     def visit_BinaryExpression(self, p_binexpr):
         left = p_binexpr.left.accept(self)

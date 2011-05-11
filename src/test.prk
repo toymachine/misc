@@ -34,7 +34,6 @@ function test3() {
     }
     println(sum(10, 20))
 }
-*/
 
 function test4() {
     val a = 10
@@ -45,10 +44,12 @@ function test4() {
         }
     }
 }
+*/
 
+function test5() {
+}
 
 function main(a, b) {
-    val d = test4()
-    println(d["sum"]())
+    println(test5())
 }
 

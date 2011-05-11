@@ -72,7 +72,6 @@ def createCallExpression(s, l, t):
     node = CallExpression()
     node.expr = t[0][0]
     node.arguments = t[0][1]
-#   print 'cllexpr', t, node.name, node.arguments
     return node
 
 def createForStatement(s, l, t):
@@ -126,7 +125,7 @@ block = LBRACE + Group(ZeroOrMore(statement)) + RBRACE
 
 functionParameters = Group(Optional(delimitedList(identifier)))
 
-functionLiteral = Suppress(KEYWORD_FUNCTION) + LPAREN + functionParameters + RPAREN + block
+functionLiteral = Suppress(KEYWORD_FUNCTION) + LPAREN + functionParameters + RPAREN + (block | (Suppress('=>') + Group(expression)))
 functionLiteral.setParseAction(createFunctionLiteral)
 
 operand = (identifierExpression | integerLiteral | stringLiteral | dictLiteral | listLiteral | functionLiteral)
