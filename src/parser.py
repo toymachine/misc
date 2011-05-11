@@ -70,8 +70,9 @@ def createSubscriptExpression(s, l, t):
 
 def createCallExpression(s, l, t):
     node = CallExpression()
-    node.name = t[0]
-    node.arguments = t[1]
+    node.expr = t[0][0]
+    node.arguments = t[0][1]
+#   print 'cllexpr', t, node.name, node.arguments
     return node
 
 def createForStatement(s, l, t):
@@ -119,9 +120,6 @@ dictLiteralPair = Group(expression + COLON + expression)
 dictLiteral = LBRACE + Optional(delimitedList(dictLiteralPair)) + RBRACE
 dictLiteral.setParseAction(createDictLiteralExpression)
 
-callExpression = identifier + LPAREN + Group(Optional(delimitedList(expression))) + RPAREN
-callExpression.setParseAction(createCallExpression)
-
 statement = Forward()
 
 block = LBRACE + Group(ZeroOrMore(statement)) + RBRACE
@@ -131,12 +129,14 @@ functionParameters = Group(Optional(delimitedList(identifier)))
 functionLiteral = Suppress(KEYWORD_FUNCTION) + LPAREN + functionParameters + RPAREN + block
 functionLiteral.setParseAction(createFunctionLiteral)
 
-operand = (callExpression | identifierExpression | integerLiteral | stringLiteral | dictLiteral | listLiteral | functionLiteral)
+operand = (identifierExpression | integerLiteral | stringLiteral | dictLiteral | listLiteral | functionLiteral)
 
+callOperator = LPAREN + Group(Optional(delimitedList(expression))) + RPAREN
 subscriptOperator = LBRACK + expression + RBRACK
 
 expression << operatorPrecedence(operand, [
     (subscriptOperator, 1, opAssoc.LEFT, createSubscriptExpression),
+    (callOperator, 1, opAssoc.LEFT, createCallExpression),
     (oneOf("* / %"), 2, opAssoc.LEFT, createBinaryExpression),
     (oneOf("+ -"), 2, opAssoc.LEFT, createBinaryExpression),
     ("==", 2, opAssoc.LEFT, createBinaryExpression)])

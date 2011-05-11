@@ -60,19 +60,13 @@ class Compiler(object):
         return clj.stringliteral(p_literalexpr.value)
 
     def visit_IdentifierExpression(self, p_identexpr):
-        #return jast.VariableExpression(p_identexpr.identifier)
         return clj.ident(p_identexpr.identifier)
 
     def visit_IfExpression(self, p_ifexpr):
-        #def blockOrExpr(statements):
-        #    if len(statements) == 1:
-        #        return statements[0].accept(self)
-        #    else:
-        #        return clj.list([clj.DO] + [stmt.accept(self) for stmt in statements])
         return clj.list([clj.IF, p_ifexpr.expr.accept(self), self.compile_block(p_ifexpr.trueBlock), self.compile_block(p_ifexpr.falseBlock)])
 
     def visit_CallExpression(self, p_callexpr):
-        return clj.list([clj.ident(p_callexpr.name)] + [argument.accept(self) for argument in p_callexpr.arguments])
+        return clj.list([p_callexpr.expr.accept(self)] + [argument.accept(self) for argument in p_callexpr.arguments])
 
     #def visit_BindStatement(self, p_bindstmt):
     #    return clj.list([clj.LET, clj.vector([clj.ident(p_bindstmt.name), p_bindstmt.expr.accept(self)])])
