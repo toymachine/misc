@@ -61,6 +61,10 @@ class ListLiteralExpression(Expression):
     def __init__(self, exprs):
         self.exprs = exprs
 
+class FunctionLiteralExpression(Expression):
+    def __init__(self):
+        self.statements = []
+
 class DictLiteralExpression(Expression):
     def __init__(self, pairs):
         self.pairs = pairs

@@ -100,6 +100,7 @@ DO = ident("do")
 LET = ident("let")
 IF = ident("if")
 VECTOR = ident("vector")
+FN = ident("fn")
 
 if __name__ == '__main__':
     pp = PrettyPrinter()

@@ -9,6 +9,12 @@ def createFunctionStatement(s, l, t):
     node.statements = t[2]
     return node
 
+def createFunctionLiteral(s, l, t):
+    node = FunctionLiteralExpression()
+    node.parameters = [(None, name) for name in t[0]]
+    node.statements = t[1]
+    return node
+    
 def createModule(s, l, t):
     node = Module()
     node.statements = t
@@ -83,6 +89,7 @@ KEYWORD_ELSE = "else"
 KEYWORD_FOR = "for"
 KEYWORD_IN = "in"
 
+
 LPAREN = Suppress("(")
 RPAREN = Suppress(")")
 LBRACE = Suppress("{")
@@ -91,7 +98,8 @@ LBRACK = Suppress("[")
 RBRACK = Suppress("]")
 COLON = Suppress(":")
 
-identifier = Word(alphas, alphanums + '_')
+#TODO add more keywords to notany:
+identifier = NotAny(Literal(KEYWORD_FUNCTION)) + Word(alphas, alphanums + '_')
 
 identifierExpression = identifier.copy()
 identifierExpression.setParseAction(createIdentifierExpression)
@@ -114,7 +122,16 @@ dictLiteral.setParseAction(createDictLiteralExpression)
 callExpression = identifier + LPAREN + Group(Optional(delimitedList(expression))) + RPAREN
 callExpression.setParseAction(createCallExpression)
 
-operand = (callExpression | identifierExpression | integerLiteral | stringLiteral | listLiteral | dictLiteral)
+statement = Forward()
+
+block = LBRACE + Group(ZeroOrMore(statement)) + RBRACE
+
+functionParameters = Group(Optional(delimitedList(identifier)))
+
+functionLiteral = Suppress(KEYWORD_FUNCTION) + LPAREN + functionParameters + RPAREN + block
+functionLiteral.setParseAction(createFunctionLiteral)
+
+operand = (callExpression | identifierExpression | integerLiteral | stringLiteral | dictLiteral | listLiteral | functionLiteral)
 
 subscriptOperator = LBRACK + expression + RBRACK
 
@@ -124,9 +141,6 @@ expression << operatorPrecedence(operand, [
     (oneOf("+ -"), 2, opAssoc.LEFT, createBinaryExpression),
     ("==", 2, opAssoc.LEFT, createBinaryExpression)])
 
-statement = Forward()
-
-block = LBRACE + Group(ZeroOrMore(statement)) + RBRACE
 
 ifExpression = Suppress(KEYWORD_IF) + LPAREN + expression + RPAREN + block + Optional(Suppress(KEYWORD_ELSE) + block)
 ifExpression.setParseAction(createIfExpression)
@@ -144,7 +158,7 @@ forStatement.setParseAction(createForStatement)
 
 statement << (bindStatement | returnStatement | forStatement | exprStatement)
 
-functionDef = Suppress(KEYWORD_FUNCTION) + identifier + LPAREN + Group(Optional(delimitedList(identifier))) + RPAREN + block
+functionDef = Suppress(KEYWORD_FUNCTION) + identifier + LPAREN + functionParameters + RPAREN + block
 functionDef.setParseAction(createFunctionStatement)
 
 # define grammar

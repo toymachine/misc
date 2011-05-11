@@ -25,6 +25,14 @@ function test2() {
     }
 }
 
+function test3() {
+    val c = 30
+    val sum = function(a,b) {
+        return a + b + c
+    }
+    println(sum(10, 20))
+}
+
 function main(a, b) {
-    return test2()
+    return test3()
 }

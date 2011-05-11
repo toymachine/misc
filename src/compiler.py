@@ -32,11 +32,17 @@ class Compiler(object):
     def visit_FunctionStatement(self, p_function):
 
         clj_parameters = [clj.ident(parameter_name) for (_, parameter_name) in p_function.parameters]
-
         clj_cfunc = clj.list([clj.DEFN, clj.ident(p_function.name), clj.vector(clj_parameters), self.compile_block(p_function.statements)])
 
         return clj_cfunc
 
+    def visit_FunctionLiteralExpression(self, p_literalfunc):
+        
+        clj_parameters = [clj.ident(parameter_name) for (_, parameter_name) in p_literalfunc.parameters]
+        clj_cfunc = clj.list([clj.FN, clj.vector(clj_parameters), self.compile_block(p_literalfunc.statements)])
+
+        return clj_cfunc
+    
     def visit_IntegerLiteralExpression(self, p_literalexpr):
         return clj.intliteral(p_literalexpr.value)
 
