@@ -136,10 +136,10 @@ subscriptOperator = LBRACK + expression + RBRACK
 expression << operatorPrecedence(operand, [
     (subscriptOperator, 1, opAssoc.LEFT, createSubscriptExpression),
     (callOperator, 1, opAssoc.LEFT, createCallExpression),
-    (oneOf("* / %"), 2, opAssoc.LEFT, createBinaryExpression),
+    (oneOf("* /"), 2, opAssoc.LEFT, createBinaryExpression),
     (oneOf("+ -"), 2, opAssoc.LEFT, createBinaryExpression),
-    (oneOf("> <"), 2, opAssoc.LEFT, createBinaryExpression),
-    ("==", 2, opAssoc.LEFT, createBinaryExpression)])
+    (Literal(">=") | Literal("<=") | oneOf("> <"), 2, opAssoc.LEFT, createBinaryExpression),
+    (Literal("==") | Literal("!="), 2, opAssoc.LEFT, createBinaryExpression)])
 
 
 ifExpression = Suppress(KEYWORD_IF) + LPAREN + expression + RPAREN + block + Optional(Suppress(KEYWORD_ELSE) + block)
