@@ -77,6 +77,12 @@ class Compiler(object):
     def visit_BinaryExpression(self, p_binexpr):
         left = p_binexpr.left.accept(self)
         operator = p_binexpr.operator
+        if operator == "==":
+            operator = "="
+        elif operator == "!=":
+            operator = "not="
+        else:
+            pass
         right = p_binexpr.right.accept(self)
         return clj.list([clj.ident(operator), left, right])
 
