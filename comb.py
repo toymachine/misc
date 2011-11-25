@@ -13,6 +13,14 @@ class Result(object):
     def __repr__(self):
         return str(self)
 
+class Empty(object):
+    def __init__(self, i):
+        self.start = i
+        self.end = i
+
+    def __repr__(self):
+        return "<empty: [%d]>" % self.start
+
 class Cons(object):
     def __init__(self, head, rest, start, end):
         self.head, self.rest = head, rest
@@ -25,25 +33,42 @@ class Cons(object):
         return str(self)
 
 def term(w):
-    def _parser(s, i):
+    def parser(s, i):
         if s[i:].startswith(w):
             yield Result(w, i, i + len(w))
-    return _parser
+    return parser
+
+def _empty():
+    def parser(s, i):
+        yield Empty(i)
+    return parser
+empty = _empty()
+
+def eat_space(p):
+    def parser(s, i):
+        while i < len(s) and s[i].isspace():
+            i += 1
+        for r in p(s, i):
+            yield r
+    return parser
+
+def token(w):
+    return eat_space(term(w))
 
 def alt2(left, right):
-    def _parser(s, i):
+    def parser(s, i):
         for r in left(s, i):
             yield r
         for r in right(s, i):
             yield r
-    return _parser
+    return parser
 
 def cat2(left, right):
-    def _parser(s, i):
+    def parser(s, i):
         for lr in left(s, i):
             for rr in right(s, lr.end):
                 yield Cons(lr, rr, i, rr.end)
-    return _parser
+    return parser
 
 def alt(*args):
     return reduce(alt2, args)
@@ -51,16 +76,24 @@ def alt(*args):
 def cat(*args):
     return reduce(cat2, args)
 
-#m = word("piet")
-#m = alt2(term("piet"), term("piet blaat"))
-#m = cat2(term("piet"), term(" blaat aap"))
-#m = alt2(cat2(term("pie"), term("t blaat aap")), cat2(term("p"), term("iet blaat aap")))
 
-#m = alt(term("piet"), term("piet bl"), term("piet blaat"))
-m = cat(term("piet"), term(" bl"), term("aat"))
+def delay(f, p):
+    def parser(s, i):
+        _p = f(p)
+        for r in _p(s, i):
+            yield r
+    return parser
 
-s = "piet blaat aap"
+def one_or_more(p):
+    return cat2(p, alt2(empty, delay(one_or_more, p)))
+                
+def zero_or_one(p):
+    return alt2(empty, p)
 
-print list(m(s, 0))
+def zero_or_more(p):
+    return alt2(empty, one_or_more(p))
+
+#whitespace
+#syntaxerror
 
 
