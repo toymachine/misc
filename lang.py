@@ -1,5 +1,17 @@
 from comb import *
 
+def eat_space(p):
+    def parser(s, i):
+        while i < len(s) and s[i].isspace():
+            i += 1
+        for r in p(s, i):
+            yield r
+    return parser
+
+def token(w):
+    return eat_space(term(w))
+
+
 #m = word("piet")
 #m = alt2(term("piet"), term("piet blaat"))
 #m = cat2(term("piet"), term(" blaat aap"))
@@ -23,6 +35,13 @@ def x2():
 
     printres(m(s, 0))
 
+def x4():
+    m = cat(term("a"), term("b"), term("a"))
+
+    s = "abab"
+
+    printres(m(s, 0))
+
 def x3():
     s = """
 namespace   {
@@ -31,8 +50,7 @@ function() {
 
 }
 
-}
-"""
+}"""
 
     NAMESPACE = token("namespace")
     FUNCTION = token("function")
@@ -45,7 +63,7 @@ function() {
 
     stmts = zero_or_more(function_stmt)
     
-    module = cat(NAMESPACE, LBRACE, stmts, RBRACE)
+    module = cat(NAMESPACE, LBRACE, stmts, RBRACE, eof)
     
     printres(module(s, 0))
 
