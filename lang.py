@@ -29,24 +29,53 @@ def _integer_literal():
 integer_literal = _integer_literal()
 
 def precedence_climber(primary, operators = None):
+    class EOF(Exception): pass
+
     operators = operators or \
-        [('+', "bla"),
-         ('-', "piet")]
+        [('+', 1),
+         ('-', 1)]
 
     def next_token(s, i):
+        """finds longest matching operator"""
         i = skip_space(s, i)
+        if i >= len(s):
+            raise EOF()
+        found = (0, None)
         for operator in operators:
-            if s[i:].startswith(operator[0]):
-                return operator
-        assert False, 'unknown operator from: %s' % s[i:]
+            op = operator[0]
+            if s[i:].startswith(op):
+                if len(op) > found[0]:
+                    found = (len(op), operator)
+        if found[0] > 0:
+            return found[1], i + len(found[1][0])
+        else:
+            assert False, 'unknown operator from: %s' % s[i:]
+
+    def parse_primary(s, i):
+        r = list(primary(s, i))[0]
+        return r, r[2]
 
     def parse_expression(lhs, min_precedence, s, i):
-        op = next_token(s, i)
-        print 'op', op
+        while True:
+            try:
+                (op, precedence), i = next_token(s, i)
+            except EOF:
+                break
+            if precedence < min_precedence:
+                break
+            rhs, i = parse_primary(s, i)
+            print op, i, s[i:], rhs
+            while True:
+                try:
+                    (la_op, la_precedence), i = next_token(s, i)
+                except EOF:
+                    break
+            print lhs, op, rhs
+        print 'ret'
 
     def parser(s, i):
-        val, start, end = list(primary(s, i))[0]
-        parse_expression(val, 0, s, end)
+        lhs, i = parse_primary(s, i)
+        yield parse_expression(lhs, 0, s, i)
 
     return parser
 
@@ -123,7 +152,7 @@ function() {
 
     printres(module(s, 0))
 
-    printres(expression("1 += 2", 0))
+    printres(expression("1 + 2", 0))
 
 x3()
 
