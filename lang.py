@@ -17,6 +17,20 @@ def eat_space(p):
 def token(w):
     return eat_space(term(w))
 
+def alt_tokens(*ws):
+    return alt(*map(token, ws))
+
+def longest(p):
+    def parser(s, i):
+        longest_len = -1
+        longest_res = None
+        for val, start, end in p(s, i):
+            l = end - start
+            if l > longest_len:
+                longest_res = (val, start, end)
+        if longest_res:
+            yield longest_res
+    return parser
 
 def _integer_literal():
     RE_INTEGER_LITERAL = re.compile(r"\d+")
@@ -33,9 +47,13 @@ def precedence_climber(primary, operators = None):
 
     operators = operators or \
         [('+', 1),
-         ('-', 1)]
+         ('-', 1),
+         ('+=', 1)]
+        
+    operator_map = dict([(x[0], x) for x in operators])
+    operator_parser = longest(alt_tokens(*[x[0] for x in operators]))
 
-    def next_token(s, i):
+    def xnext_token(s, i):
         """finds longest matching operator"""
         i = skip_space(s, i)
         if i >= len(s):
@@ -50,6 +68,14 @@ def precedence_climber(primary, operators = None):
             return found[1], i + len(found[1][0])
         else:
             assert False, 'unknown operator from: %s' % s[i:]
+
+    def next_token(s, i):
+        if i >= len(s):
+            raise EOF()
+        res = list(operator_parser(s, i))
+        assert len(res) == 1, "expected to find exactly one operator"
+        operator, start, end = res[0]
+        return operator_map[operator], end
 
     def parse_primary(s, i):
         r = list(primary(s, i))[0]
@@ -98,8 +124,9 @@ class forward(object):
 #m = alt(term("piet"), term("piet bl"), term("piet blaat"))
 
 def printres(res):
-    for x in res:
-        print x
+    print 'res:'
+    for i, x in enumerate(res):
+        print i, x
 
 def x1():
     m = cat(term("piet"), term(" bl"), term("aat"))
@@ -152,7 +179,7 @@ function() {
 
     printres(module(s, 0))
 
-    printres(expression("1 + 2", 0))
+    printres(expression("1+2", 0))
 
 x3()
 
@@ -161,3 +188,5 @@ def x5():
 
     
 printres(integer_literal("123", 0))
+
+printres(longest(alt_tokens("+", "-", "+="))(" +=", 0))
