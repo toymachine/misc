@@ -46,58 +46,54 @@ def precedence_climber(primary, operators = None):
     class EOF(Exception): pass
 
     operators = operators or \
-        [('+', 1),
+        [('*', 2),
+         ('+', 1),
          ('-', 1),
          ('+=', 1)]
         
     operator_map = dict([(x[0], x) for x in operators])
     operator_parser = longest(alt_tokens(*[x[0] for x in operators]))
 
-    def xnext_token(s, i):
-        """finds longest matching operator"""
-        i = skip_space(s, i)
-        if i >= len(s):
-            raise EOF()
-        found = (0, None)
-        for operator in operators:
-            op = operator[0]
-            if s[i:].startswith(op):
-                if len(op) > found[0]:
-                    found = (len(op), operator)
-        if found[0] > 0:
-            return found[1], i + len(found[1][0])
-        else:
-            assert False, 'unknown operator from: %s' % s[i:]
-
     def next_token(s, i):
+        print 'next tok', repr(s[i:])
         if i >= len(s):
             raise EOF()
         res = list(operator_parser(s, i))
-        assert len(res) == 1, "expected to find exactly one operator"
+        assert len(res) == 1, "expected to find exactly one operator: + " + repr(res)
         operator, start, end = res[0]
         return operator_map[operator], end
 
     def parse_primary(s, i):
+        print 'prs prim', i, repr(s[i:])
         r = list(primary(s, i))[0]
         return r, r[2]
 
     def parse_expression(lhs, min_precedence, s, i):
+        print 'parseexp', repr(lhs), min_precedence, repr(s[i:])
         while True:
             try:
-                (op, precedence), i = next_token(s, i)
+                (op, op_precedence), i = next_token(s, i)
+                print '1a op', repr(op), op_precedence
             except EOF:
+                print '1b', 'EOF'
                 break
-            if precedence < min_precedence:
+            if op_precedence < min_precedence:
+                print '1c', op_precedence < min_precedence
                 break
             rhs, i = parse_primary(s, i)
-            print op, i, s[i:], rhs
+            print 'pp result', repr(rhs), 'rest', repr(s[i:])
+            #print op, i, s[i:], rhs
             while True:
                 try:
                     (la_op, la_precedence), i = next_token(s, i)
+                    print '2a, la', repr(la_op), la_precedence
                 except EOF:
                     break
+                if not la_precedence >= op_precedence:
+                    break
+                rhs, i = parse_expression(rhs, la_precedence, s, i)
             print lhs, op, rhs
-        print 'ret'
+        #print 'ret'
 
     def parser(s, i):
         lhs, i = parse_primary(s, i)
@@ -176,10 +172,10 @@ function() {
                    integer_literal)
 
     expression.define( precedence_climber(primary) )
+    
+    #printres(module(s, 0))
 
-    printres(module(s, 0))
-
-    printres(expression("1+2", 0))
+    printres(expression("2 + 3 * 4 + 5", 0))
 
 x3()
 
@@ -187,6 +183,5 @@ def x5():
     s = """10"""
 
     
-printres(integer_literal("123", 0))
-
-printres(longest(alt_tokens("+", "-", "+="))(" +=", 0))
+#printres(integer_literal("123", 0))
+#printres(longest(alt_tokens("+", "-", "+="))(" +=", 0))
