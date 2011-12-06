@@ -66,7 +66,8 @@ def precedence_climber(primary, operators = None):
     def parse_primary(s, i):
         print 'prs prim', i, repr(s[i:])
         r = list(primary(s, i))[0]
-        return r, r[2]
+        print 'prs prim res', int(r[0])
+        return int(r[0]), r[2]
 
     def parse_expression(lhs, min_precedence, s, i):
         print 'parseexp', repr(lhs), min_precedence, repr(s[i:])
