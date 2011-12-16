@@ -2,6 +2,13 @@ import re
 
 from comb import *
 
+class loc(object):
+    def __init__(self, i):
+        self.i = i
+
+    def __add__(self, other):
+        assert False
+
 def skip_space(s, i):
     while i < len(s) and s[i].isspace():
         i += 1
@@ -128,7 +135,7 @@ def printres(res):
 def x1():
     m = cat(term("piet"), term(" bl"), term("aat"))
     s = "piet blaat aap"
-    print list(m(s, 0))
+    print list(m(extent(s)))
 
 def x2():
     m = zero_or_more(term("a"))
@@ -174,14 +181,11 @@ function() {
 
     expression.define( precedence_climber(primary) )
     
-    #printres(module(s, 0))
+    printres(module(s, loc(0)))
 
-    printres(expression("2 + 3 * 4 + 5", 0))
+    #printres(expression("2 + 3 * 4 + 5", 0))
 
-x3()
-
-def x5():
-    s = """10"""
+x1()
 
     
 #printres(integer_literal("123", 0))
