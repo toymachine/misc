@@ -62,7 +62,7 @@ def precedence_climber(primary, operators = None):
     operator_parser = longest(alt_tokens(*[x[0] for x in operators]))
 
     def next_token(s, i):
-        print 'next tok', repr(s[i:])
+        #print 'next tok', repr(s[i:])
         if i >= len(s):
             raise EOF()
         res = list(operator_parser(s, i))
@@ -71,37 +71,38 @@ def precedence_climber(primary, operators = None):
         return operator_map[operator], end
 
     def parse_primary(s, i):
-        print 'prs prim', i, repr(s[i:])
         r = list(primary(s, i))[0]
-        print 'prs prim res', int(r[0])
+        #print 'prs prim', i, repr(s[i:]), '=>', int(r[0])
         return int(r[0]), r[2]
-
+    
     def parse_expression(lhs, min_precedence, s, i):
-        print 'parseexp', repr(lhs), min_precedence, repr(s[i:])
+        #print 'parseexp', repr(lhs), min_precedence, repr(s[i:])
         while True:
             try:
-                (op, op_precedence), i = next_token(s, i)
-                print '1a op', repr(op), op_precedence
+                (op, op_precedence), next_i = next_token(s, i)
+                #print '1a op is ', repr(op), 'precedence: ', op_precedence
             except EOF:
-                print '1b', 'EOF'
+                #print '1b', 'EOF'
                 break
             if op_precedence < min_precedence:
-                print '1c', op_precedence < min_precedence
+                #print '1c', op_precedence < min_precedence
                 break
-            rhs, i = parse_primary(s, i)
-            print 'pp result', repr(rhs), 'rest', repr(s[i:])
+            rhs, i = parse_primary(s, next_i)
+            #print 'rhs:', repr(rhs), 'rest', repr(s[i:])
             #print op, i, s[i:], rhs
             while True:
                 try:
-                    (la_op, la_precedence), i = next_token(s, i)
-                    print '2a, la', repr(la_op), la_precedence
+                    (la_op, la_precedence), _ = next_token(s, i)
+                    #print '2a, la', repr(la_op), la_precedence
                 except EOF:
                     break
                 if not la_precedence >= op_precedence:
                     break
                 rhs, i = parse_expression(rhs, la_precedence, s, i)
-            print lhs, op, rhs
-        #print 'ret'
+            lhs = (lhs, op, rhs) #apply_op(op,lhs, rhs)
+            #print 'new lhs', lhs
+        print 'ret lhs', lhs
+        return lhs, i
 
     def parser(s, i):
         lhs, i = parse_primary(s, i)
@@ -182,6 +183,7 @@ function() {
     expression.define( precedence_climber(primary) )
     
     printres(module(s, loc(0)))
+    printres(expression("2 + 3 * 4 + 5 * 12", 0))
 
     #printres(expression("2 + 3 * 4 + 5", 0))
 
