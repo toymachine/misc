@@ -1,1 +1,2 @@
-(ns gl.core)
+(ns gl.core
+  (:use [clojure.walk]))
