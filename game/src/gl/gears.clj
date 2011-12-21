@@ -114,7 +114,7 @@
   (text/write-to-screen (format "%d fps" (int (/ 1 delta))) 0 0)  
   (rotate (:rot-x state) 1 0 0)
   (rotate (:rot-y state) 0 1 0)
-  (rotate (* -40. (rem time 360)) 0 0 1)
+  (rotate (* -30. (rem time 360)) 0 0 1)
   ((:gear state))
   (app/repaint!))
 
