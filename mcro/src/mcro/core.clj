@@ -5,12 +5,15 @@
 
 (declare expand)
 
-(defn- expand-v3+ [a b]
-  (let [ae (expand a)
-        be (expand b)]
-    [`(double (+ ~(nth ae 0) ~(nth be 0)))
-     `(double (+ ~(nth ae 1) ~(nth be 1)))
-     `(double (+ ~(nth ae 2) ~(nth be 2)))]))
+(defn- expand-v3+
+  ([a b]
+     (let [ae (expand a)
+           be (expand b)]
+       [`(double (+ ~(nth ae 0) ~(nth be 0)))
+        `(double (+ ~(nth ae 1) ~(nth be 1)))
+        `(double (+ ~(nth ae 2) ~(nth be 2)))]))
+  ([a b & rest]
+     (expand (concat (list 'v3+ (list 'v3+ a b)) rest))))
 
 (defn- expand-v3* [[s a]]
   (let [ae (expand a)]
@@ -33,8 +36,9 @@
   (str "[" (.x a) " " (.y a) " " (.z a) "]"))
 
 (defn testx []
-  (minline-v3 (v3* 5.0 (v3+ (v3 0.1 0.2 0.3) (v3 1.1 1.2 1.3)))))
+  (minline-v3 (v3* 5.0 (v3+ (v3 0.1 0.2 0.3) (v3 1.1 1.2 1.3) (v3 2.1 2.2 2.3) (v3 3.1 3.2 3.3)))))
 
-                                        ;(pprint (v3-str (testx)))
-(println (macroexpand '(minline-v3 (v3+ (v3 0.1 0.2 0.3) (v3 1.1 1.2 1.3)))))
+(pprint (v3-str (testx)))
+
+(println (macroexpand '(minline-v3 (v3+ (v3 0.1 0.2 0.3) (v3 1.1 1.2 1.3) (v3 2.1 2.2 2.3) (v3 3.1 3.2 3.3) ))))
 
