@@ -1,4 +1,4 @@
-(ns sio.game
+(ns gl.game
   (:import
    [javax.swing JFrame JPanel Timer]
    [java.awt Toolkit Color Graphics2D]

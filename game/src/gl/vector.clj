@@ -1,4 +1,4 @@
-(ns sio.vector)
+(ns gl.vector)
 
 (set! *warn-on-reflection* true)
 

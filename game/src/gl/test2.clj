@@ -1,6 +1,6 @@
-(ns sio.test2
-  (:use [sio.vector])
-  (:require [sio.game :as game])
+(ns gl.test2
+  (:use [gl.vector])
+  (:require [gl.game :as game])
   (:import
    [java.awt Graphics2D Color]
    [java.util Random]))
@@ -19,20 +19,18 @@
         (v* b (.velocity state)))))
 
 ;evaluate/integrate form the RK4 integrator
-(defn evaluate [^State initial t dt ^Derivative derivative acceleration]
+(defn evaluate ^Derivative [^State initial t dt ^Derivative derivative acceleration]
   (let [state (State. (v+ (.position initial) (v* dt (.dx derivative)))
                       (v+ (.velocity initial) (v* dt (.dv derivative))))]
     (Derivative. (.velocity state) (acceleration state (+ t dt)))))
 
-(defn integrate [^State state t dt acceleration]
-  (let [^Derivative a (evaluate state t 0 (Derivative. vector-3d-zero vector-3d-zero) acceleration)
-        ^Derivative b (evaluate state t (* dt 1/2) a acceleration)
-        ^Derivative c (evaluate state t (* dt 1/2) b acceleration)
-        ^Derivative d (evaluate state t dt c acceleration)
-        dxdt (v* 1/6 (v+ (.dx a) (v* 2 (v+ (.dx b) (.dx c))) (.dx d)))
-        dvdt (v* 1/6 (v+ (.dv a) (v* 2 (v+ (.dv b) (.dv c))) (.dv d)))]
-    (State. (v+ (.position state) (v* dt dxdt))
-            (v+ (.velocity state) (v* dt dvdt)))))
+(defn integrate ^State [^State state ^double t ^double dt acceleration]
+  (let [^Derivative a (evaluate state t (double 0) (Derivative. vector-3d-zero vector-3d-zero) acceleration)
+        ^Derivative b (evaluate state t (* dt (double 0.5)) a acceleration)
+        ^Derivative c (evaluate state t (* dt (double 0.5)) b acceleration)
+        ^Derivative d (evaluate state t dt c acceleration)]
+    (State. (v+ (.position state) (v* dt (v* 1/6 (v+ (.dx a) (v* 2 (v+ (.dx b) (.dx c))) (.dx d)))))
+            (v+ (.velocity state) (v* dt (v* 1/6 (v+ (.dv a) (v* 2 (v+ (.dv b) (.dv c))) (.dv d))))))))
 
 ;demo
 (def acceleration
@@ -51,4 +49,4 @@
 (defn start []
   (game/start 400 400 25 simulate render (State. (vector-3d 200.0 100.0 0) vector-3d-zero)))
         
-;(sim 100  1/10)
+                                        ;(sim 100  1/10)
